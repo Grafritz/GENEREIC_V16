@@ -563,8 +563,9 @@ Partial Class FormGeneric
         '
         'CB_ActionStoreProcedure
         '
+        Me.CB_ActionStoreProcedure.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.CB_ActionStoreProcedure.FormattingEnabled = True
-        Me.CB_ActionStoreProcedure.Items.AddRange(New Object() {"CREATE", "ALTER"})
+        Me.CB_ActionStoreProcedure.Items.AddRange(New Object() {"CREATE ", "ALTER "})
         Me.CB_ActionStoreProcedure.Location = New System.Drawing.Point(152, 32)
         Me.CB_ActionStoreProcedure.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.CB_ActionStoreProcedure.Name = "CB_ActionStoreProcedure"

@@ -17,9 +17,9 @@ Public Class FormGeneric
             'SetupReportGeneration()
             'SetupCurrentPrefix()
             'ispossible = True
-            'rcmb_DatabaseName.Items.Add("CREATE ")
-            'rcmb_DatabaseName.Items.Add("UPDATE ")
-            'CB_ActionStoreProcedure.SelectedIndex = 0
+            rcmb_DatabaseName.Items.Add("CREATE ")
+            rcmb_DatabaseName.Items.Add("UPDATE ")
+            CB_ActionStoreProcedure.SelectedIndex = 0
 
             LoadInstanceSQLServer()
         Catch ex As Exception

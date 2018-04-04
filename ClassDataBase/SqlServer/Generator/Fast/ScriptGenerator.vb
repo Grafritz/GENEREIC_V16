@@ -93,7 +93,7 @@ Namespace SqlServer.Fast
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
-                                & "" & SqlServerHelper.CurrentPrefixStored & "PROCEDURE [dbo].[SP_Insert_" & objectname & "] " & Chr(13) & Chr(10) _
+                                & "" & SqlServerHelper.CurrentPrefixStored & " PROCEDURE [dbo].[SP_Insert_" & objectname & "] " & Chr(13) & Chr(10) _
                                 & "(" & Chr(13) & Chr(10) _
                                 & Chr(9) & paramStore & Chr(13) & Chr(10) _
                                 & ")" & Chr(13) & Chr(10) _
@@ -194,7 +194,7 @@ Namespace SqlServer.Fast
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
-                                & "" & SqlServerHelper.CurrentPrefixStored & "PROCEDURE [dbo].[SP_Update_" & objectname & "] " & Chr(13) & Chr(10) _
+                                & "" & SqlServerHelper.CurrentPrefixStored & "  PROCEDURE [dbo].[SP_Update_" & objectname & "] " & Chr(13) & Chr(10) _
                                 & "(" & Chr(13) & Chr(10) _
                                 & Chr(9) & paramStore & Chr(13) & Chr(10) _
                                 & ")" & Chr(13) & Chr(10) _
@@ -242,12 +242,12 @@ Namespace SqlServer.Fast
             Dim store As String = Chr(13) & Chr(10) _
                                  & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & Cls_Enumeration.GENERATE_BY_APP_NAME_ForStore & Chr(13) & Chr(10) _
-                                & "/******  Object:  StoredProcedure [dbo].[SP_Delete_" & objectname & "]     Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
+                                & "/******  Object:  Stored PROCEDURE [dbo].[SP_Delete_" & objectname & "]     Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
                                 & "SET ANSI_NULLS ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
-                                & "" & SqlServerHelper.CurrentPrefixStored & "PROCEDURE [dbo].[SP_Delete_" & objectname & "] " & Chr(13) & Chr(10) _
+                                & "" & SqlServerHelper.CurrentPrefixStored & "  PROCEDURE [dbo].[SP_Delete_" & objectname & "] " & Chr(13) & Chr(10) _
                                 & "(" & Chr(13) & Chr(10) _
                                 & Chr(9) & "@ID " & Id_table_type & Chr(13) & Chr(10) _
                                 & ")" & Chr(13) & Chr(10) _
@@ -293,7 +293,7 @@ Namespace SqlServer.Fast
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
-                                & "" & SqlServerHelper.CurrentPrefixStored & "PROCEDURE [dbo].[SP_Select_" & objectname & "_ByID] " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
+                                & "" & SqlServerHelper.CurrentPrefixStored & "  PROCEDURE [dbo].[SP_Select_" & objectname & "_ByID] " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & Chr(9) & "(" & Chr(13) & Chr(10) _
                                 & Chr(9) & Chr(9) & "@ID " & Id_table_type & Chr(13) & Chr(10) _
                                 & Chr(9) & ")" & Chr(13) & Chr(10) _
@@ -373,12 +373,12 @@ Namespace SqlServer.Fast
                 Dim store As String = Chr(13) & Chr(10) _
                     & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & Cls_Enumeration.GENERATE_BY_APP_NAME_ForStore & Chr(13) & Chr(10) _
-                                & "/******  Object:  StoredProcedure [dbo].[SP_Select_" & objectname & "_" & ListofIndex.Item(indexPosition) & "]    Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
+                                & "/******  Object:  Stored PROCEDURE [dbo].[SP_Select_" & objectname & "_" & ListofIndex.Item(indexPosition) & "]    Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
                                 & "SET ANSI_NULLS ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
-                                    & "" & SqlServerHelper.CurrentPrefixStored & " PROCEDURE [dbo].[SP_Select_" & objectname & "_" & ListofIndex.Item(indexPosition) & "] " & Chr(13) & Chr(10) _
+                                    & "" & SqlServerHelper.CurrentPrefixStored & "  PROCEDURE [dbo].[SP_Select_" & objectname & "_" & ListofIndex.Item(indexPosition) & "] " & Chr(13) & Chr(10) _
                                     & Chr(9) & "(" & Chr(13) & Chr(10) _
                                     & Chr(9) & Chr(9) & "@" & ListofIndex.Item(indexPosition) & " " & ListofIndexType.Item(index_li_type(indexPosition)) & Chr(13) & Chr(10) _
                                     & Chr(9) & ")" & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
@@ -414,7 +414,7 @@ Namespace SqlServer.Fast
             Dim store As String = Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & Cls_Enumeration.GENERATE_BY_APP_NAME_ForStore & Chr(13) & Chr(10) _
-                                & "/******  Object:  StoredProcedure [dbo].[SP_ListAll_" & objectname & "]   Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
+                                & "/******  Object:  Stored PROCEDURE [dbo].[SP_ListAll_" & objectname & "]   Script Date: " & Now & " ******/" & Chr(13) & Chr(10) _
                                 & "SET ANSI_NULLS ON" & Chr(13) & Chr(10) _
                                 & "GO " & Chr(13) & Chr(10) & Chr(13) & Chr(10) _
                                 & "SET QUOTED_IDENTIFIER ON" & Chr(13) & Chr(10) _

@@ -145,7 +145,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -538,7 +538,7 @@ Namespace SqlServer.Fast
             Next
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then ' - 4
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -630,7 +630,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("<table border=""0"" cellpadding=""4"" cellspacing=""0"" width=""100%"">")
             Dim countColumn As Integer = 0
 
-            For i As Int32 = 1 To cols.Count - 3
+            For i As Int32 = 1 To cols.Count '- 3
                 If ListofForeignKey.Contains(cols(i)) Then
                     Dim columnName As String = cols(i).Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
                     Dim columnNameToShow As String = Regex.Replace(columnName, "([a-z])?([A-Z])", "$1 $2")
@@ -653,7 +653,7 @@ Namespace SqlServer.Fast
                     objWriter.WriteLine("</td>")
 
                     objWriter.WriteLine("<td style=""width: 70%;"" align=""left"">")
-                    objWriter.WriteLine("<telerik:RadDatePicker ID=""rdp_" & columnName & """ Width=""50%"" runat=""server""" & _
+                    objWriter.WriteLine("<telerik:RadDatePicker ID=""rdp_" & columnName & """ Width=""50%"" runat=""server""" &
                                      "DateInput-DateFormat=""dd/MM/yyyy"" MinDate=""1900-01-01""  ToolTip=""Cliquer sur le bouton pour choisir une date"" > " & Chr(13) & " </telerik:RadDatePicker>  ")
                     objWriter.WriteLine(" <asp:RequiredFieldValidator  ID=""RequiredFieldValidator_" & columnName & """ runat=""server"" ControlToValidate=""rdp_" & columnName & """  ")
                     objWriter.WriteLine("           ErrorMessage=""La " & columnNameToShow & " est obligatoire !"" SetFocusOnError=""true"" Display=""Dynamic"" Text=""*"" /> ")
@@ -829,7 +829,7 @@ Namespace SqlServer.Fast
             Next
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -1185,7 +1185,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -1579,7 +1579,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -2019,7 +2019,7 @@ Namespace SqlServer.Fast
             Next
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -2030,12 +2030,12 @@ Namespace SqlServer.Fast
                 End If
             Next
 
-            cols.Add("_isdirty")
-            cols.Add("_LogData")
-            types.Add("Boolean")
-            types.Add("String")
-            initialtypes.Add("Byte")
-            initialtypes.Add("nvarchar")
+            'cols.Add("_isdirty")
+            'cols.Add("_LogData")
+            'types.Add("Boolean")
+            'types.Add("String")
+            'initialtypes.Add("Byte")
+            'initialtypes.Add("nvarchar")
 
             Dim nomSimpleToShow As String = Regex.Replace(nomSimple, "([a-z])?([A-Z])", "$1 $2")
 
@@ -2192,7 +2192,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("<div id=""DIV_Panel"" class=""form-horizontal group-border-dashed1"" style=""border-radius: 0px;"">")
             Dim countColumn As Integer = 0
 
-            For i As Int32 = 1 To cols.Count - 3
+            For i As Int32 = 1 To cols.Count - 1 '3
                 objWriter.WriteLine("   <div class=""form-group"">")
 
                 If ListofForeignKey.Contains(cols(i)) Then
@@ -2457,7 +2457,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -2467,12 +2467,12 @@ Namespace SqlServer.Fast
                     Exit For
                 End If
             Next
-            cols.Add("_isdirty")
-            cols.Add("_LogData")
-            types.Add("Boolean")
-            types.Add("String")
-            initialtypes.Add("Byte")
-            initialtypes.Add("nvarchar")
+            'cols.Add("_isdirty")
+            'cols.Add("_LogData")
+            'types.Add("Boolean")
+            'types.Add("String")
+            'initialtypes.Add("Byte")
+            'initialtypes.Add("nvarchar")
 
             Dim _tmpEditState As Boolean = False
             'objWriter.WriteLine("Dim _out As Boolean = False")
@@ -2677,7 +2677,7 @@ Namespace SqlServer.Fast
                 .WriteLine("                Btn_SaveInfo.Visible = Cls_Privilege.VerifyRightOnObject(Btn_Edit, User_Connected.IdGroupeuser)")
                 .WriteLine("                With obj")
 
-                For i As Int32 = 1 To cols.Count - 3
+                For i As Int32 = 1 To cols.Count - 1 '3
                     If ListofForeignKey.Contains(cols(i)) Then
                         Dim nom_DDL As String = "DDL" & cols(i) '.Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
 
@@ -2763,7 +2763,7 @@ Namespace SqlServer.Fast
                 .WriteLine("        Dim _id As Long = TypeSafeConversion.NullSafeLong(txt_Code" & nomSimple & "_Hid.Text)")
                 .WriteLine("        Dim obj As New " & nomClasse & "(_id)")
                 .WriteLine("        With obj")
-                For i As Int32 = 1 To cols.Count - 3
+                For i As Int32 = 1 To cols.Count - 1 '3
                     Dim columnToUse As String = cols(i).Substring(1, cols(i).Length - 1)
                     If ListofForeignKey.Contains(cols(i)) Then
                         Dim ForeinKeyPrefix As String = columnToUse '.Substring(SqlServerHelper.ForeinKeyPrefix.Length, columnToUse.Length - (SqlServerHelper.ForeinKeyPrefix.Length))
@@ -2947,7 +2947,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))
@@ -2957,10 +2957,10 @@ Namespace SqlServer.Fast
                     Exit For
                 End If
             Next
-            cols.Add("_isdirty")
-            cols.Add("_LogData")
-            types.Add("Boolean")
-            types.Add("String")
+            'cols.Add("_isdirty")
+            'cols.Add("_LogData")
+            'types.Add("Boolean")
+            'types.Add("String")
             initialtypes.Add("Byte")
             initialtypes.Add("nvarchar")
 
@@ -3254,11 +3254,11 @@ Namespace SqlServer.Fast
 
                     Dim countColumn As Integer = 0
                     'Dim pourcentagevalue As Decimal = 100 / (_table.ListofColumn.Count - 4)
-                    Dim pourcentagevalue As Decimal = 100 / cols.Count - 3
+                    Dim pourcentagevalue As Decimal = 100 / cols.Count - 1 '- 3
                     Dim pourcentage As String = pourcentagevalue.ToString + "%"
 
 
-                    For i As Int32 = 1 To cols.Count - 3
+                    For i As Int32 = 1 To cols.Count - 1 '- 3
                         If ListofForeignKey.Contains(cols(i)) Then
                             Dim columnName As String = cols(i).Substring(1, cols(i).Length - 1)
                             Dim columnNameToShow As String = Regex.Replace(columnName, "([a-z])?([A-Z])", "$1 $2")
@@ -3522,7 +3522,7 @@ Namespace SqlServer.Fast
 
 
             For Each dt As DataRow In ds.Tables(1).Rows
-                If count < cap - 4 Then
+                If count < cap Then '- 4 Then
                     cols.Add("_" & dt(0))
                     types.Add(Configuration.ConfigurationSettings.AppSettings(dt(1)))
                     initialtypes.Add(dt(1))

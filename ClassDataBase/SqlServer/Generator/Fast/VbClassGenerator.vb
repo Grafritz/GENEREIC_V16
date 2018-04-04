@@ -337,7 +337,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("#Region "" Db Access """)
             objWriter.WriteLine("Public Function Insert(ByVal usr As String) As Integer Implements IGeneral.Insert")
             objWriter.WriteLine("_LogData = LogData(Me)")
-            objWriter.WriteLine("_id = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Insert_" & nomClasse.Substring(4, nomClasse.Length - 4) & """" & insertstring & ", usr))")
+            objWriter.WriteLine("_id = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Insert_" & nomClasse.Substring(4, nomClasse.Length - 4) & """" & insertstring & "))', usr))")
             objWriter.WriteLine("Return _id")
             objWriter.WriteLine("End Function")
 
@@ -345,7 +345,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("Public Function Update(ByVal usr As String) As Integer Implements IGeneral.Update")
             'objWriter.WriteLine("_LogData = """"")
             objWriter.WriteLine("_LogData = GetObjectString()")
-            objWriter.WriteLine("Return SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Update_" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id" & updatestring & ", usr)")
+            objWriter.WriteLine("Return SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Update_" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id" & updatestring & ")', usr)")
             objWriter.WriteLine("End Function" & Chr(13))
 
             With objWriter
