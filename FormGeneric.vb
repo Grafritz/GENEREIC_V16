@@ -130,10 +130,10 @@ Public Class FormGeneric
                     txt_LibraryName.Text = DatabaseName.Replace("db", "") + "Library"
                     SqlServerHelper.LoadUserTablesSchema(txt_ServerName.Text.Trim, Txt_Login.Text.Trim, Txt_Password.Text, txt_DatabaseName.Text, TreeView1)
 
-                    'ElseIf rbtn_MySql.Checked Then
-                    '    MySqlManager.LoadUserTablesSchema(TreeView1)
-                    '    MySqlManager.InitializeDb()
-                    '    BackgroundWorker1.RunWorkerAsync()
+                ElseIf rbtn_MySql.Checked Then
+                    MySqlManager.LoadUserTablesSchema(TreeView1)
+                    MySqlManager.InitializeDb()
+                    'BackgroundWorker1.RunWorkerAsync()
 
                     'ElseIf rbtn_PostGres.Checked Then
                     '    txt_LibraryName.Text = txt_DatabaseName.Text + "Library"
@@ -166,15 +166,15 @@ Public Class FormGeneric
         SqlServerHelper.password = Txt_Password.Text.Trim
         SqlServerHelper.user_login = Txt_Login.Text.Trim
 
-        'MySqlHelper.database = txt_DatabaseName.Text.Trim
-        'MySqlHelper.servername = txt_ServerName.Text.Trim
-        'MySqlHelper.password = Txt_Password.Text.Trim
-        'MySqlHelper.user_login = Txt_Login.Text.Trim
+        MySqlHelper.database = txt_DatabaseName.Text.Trim
+        MySqlHelper.servername = txt_ServerName.Text.Trim
+        MySqlHelper.password = Txt_Password.Text.Trim
+        MySqlHelper.user_login = Txt_Login.Text.Trim
 
-        'MySqlManager.servername = txt_ServerName.Text.Trim
-        'MySqlManager.user_login = Txt_Login.Text.Trim
-        'MySqlManager.password = Txt_Password.Text.Trim
-        'MySqlManager.database = txt_DatabaseName.Text.Trim
+        MySqlManager.servername = txt_ServerName.Text.Trim
+        MySqlManager.user_login = Txt_Login.Text.Trim
+        MySqlManager.password = Txt_Password.Text.Trim
+        MySqlManager.database = txt_DatabaseName.Text.Trim
 
         'PostgresSqlManager.servername = txt_ServerName.Text.Trim
         'PostgresSqlManager.user_login = Txt_Login.Text.Trim
@@ -303,8 +303,7 @@ Public Class FormGeneric
     Public Sub Folder_Browser_Dialog(ByVal _FolderBrowserDialog As FolderBrowserDialog, ByVal _Textbox As TextBox)
         Try
             Dim dlgResult As DialogResult = _FolderBrowserDialog.ShowDialog()
-
-            If dlgResult = Windows.Forms.DialogResult.OK Then
+            If dlgResult = DialogResult.OK Then
                 _Textbox.Text = _FolderBrowserDialog.SelectedPath
             End If
         Catch ex As Exception
@@ -478,27 +477,40 @@ Public Class FormGeneric
                 REM AdminLTE-Master
                 If RB_Template_AdminLTE_Master.Checked Then
                     'Interface ADD EDIT
-                    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeAsp(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
-                    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    'SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeAsp(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    'SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+
+                    ''Interface LISTING
+                    'SqlServer.Fast.AspFormGenerator.CreateListingCodeAsp(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    'SqlServer.Fast.AspFormGenerator.CreateListingCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+
+                    ' If RB_Formulaire_Tableau.Checked Then
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Tableau_Formulaire_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+
+                    'ElseIf RB_Formulaire_FlowLayout.Checked Then
+                    '    SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    '    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    'End If
 
                     'Interface LISTING
-                    SqlServer.Fast.AspFormGenerator.CreateListingCodeAsp(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
-                    SqlServer.Fast.AspFormGenerator.CreateListingCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Listing_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
                 ElseIf RB_Template_CleanZone.Checked Then ' CLeanZone
                     'Interface ADD EDIT
-                    If RB_Formulaire_Tableau.Checked Then
-                        SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    'If RB_Formulaire_Tableau.Checked Then
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
                         SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
-                    ElseIf RB_Formulaire_FlowLayout.Checked Then
-                        SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
-                        SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                        'ElseIf RB_Formulaire_FlowLayout.Checked Then
+                        '    SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                        '    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
-                    End If
+                        'End If
 
-                    'Interface LISTING
-                    SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                        'Interface LISTING
+                        SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
                     SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
                 ElseIf RB_Template_Inspinia.Checked Then

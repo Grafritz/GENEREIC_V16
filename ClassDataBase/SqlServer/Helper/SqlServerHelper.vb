@@ -68,7 +68,7 @@ Public Class SqlServerHelper
                 ByVal strPwd As String, _
                 ByVal strDatabase As String) As Long
 
-        Dim duree As TimeSpan
+        'Dim duree As TimeSpan
         Dim _systeme As Cls_Systeme = Cls_Systeme.getInstance
         Try
             _systeme.CreateLocalDatabase(strDatabase)

@@ -708,10 +708,10 @@ Partial Class FormGeneric
         'btnOpenOutput
         '
         Me.btnOpenOutput.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.btnOpenOutput.Location = New System.Drawing.Point(412, 601)
+        Me.btnOpenOutput.Location = New System.Drawing.Point(352, 601)
         Me.btnOpenOutput.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.btnOpenOutput.Name = "btnOpenOutput"
-        Me.btnOpenOutput.Size = New System.Drawing.Size(117, 54)
+        Me.btnOpenOutput.Size = New System.Drawing.Size(177, 54)
         Me.btnOpenOutput.TabIndex = 17
         Me.btnOpenOutput.Text = "Ouvrir répertoire"
         Me.btnOpenOutput.UseVisualStyleBackColor = True
