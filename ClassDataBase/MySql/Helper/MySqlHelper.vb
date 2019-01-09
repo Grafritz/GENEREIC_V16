@@ -6,6 +6,7 @@ Imports System.IO
 Imports System.Text
 Imports System.Xml
 Imports System.ComponentModel
+Imports System.Text.RegularExpressions
 
 Public Class MySqlHelper
 
@@ -22,12 +23,13 @@ Public Class MySqlHelper
 #Region "Loading Tables Fonctions"
 
     Public Shared Function LoadTableStructure_MySql(ByVal table As String) As DataSet
-        Dim ConString As String = _
-            "Persist Security Info=True;" & _
-            "server=" & servername & ";" & _
-            "database=" & database & ";" & _
-            "User Id=" & user_login & ";" & _
-            "password=" & password & ";"
+        Dim ds As New DataSet
+        Dim ConString As String =
+            "Persist Security Info=True;SslMode=none;" &
+            "server=" & servername & ";" &
+            "User Id=" & user_login & ";" &
+            "password=" & password & ";" &
+            "database=" & database & ";"
         Try
             Dim Con As New MySqlConnection(ConString)
             Con.Open()
@@ -37,7 +39,6 @@ Public Class MySqlHelper
             cmd.Connection = Con
             Dim p As New MySqlParameter
             p.Value = table
-            Dim ds As New DataSet
             Dim da As MySqlDataAdapter
             da = New MySqlDataAdapter(cmd)
             da.Fill(ds)
@@ -46,29 +47,31 @@ Public Class MySqlHelper
             Return ds
         Catch ex As Exception
             MessageBox.Show("ERREUR:" & ex.Message, "Load Table Structure MySql", MessageBoxButtons.OK)
-            '  Error_Log("LoadTableStructure", ex.Message)
+            'Error_Log("LoadTableStructure", ex.Message)
         End Try
+        Return Nothing
     End Function
 
-    Public Shared Function LoadUserTablesSchema_MySql( _
-            ByVal strServer As String, _
-            ByVal strUser As String, _
-            ByVal strPwd As String, _
-            ByVal strDatabase As String, ByRef treeview1 As TreeView) As ArrayList
+    Public Shared Function LoadUserTablesSchema_MySql(
+            ByVal treeview1 As TreeView) As ArrayList
+        'ByVal strServer As String,
+        'ByVal strUser As String,
+        'ByVal strPwd As String,
+        'ByVal strDatabase As String,
 
         Dim slTables As ArrayList = New ArrayList()
+        Dim ConString As String =
+            "Persist Security Info=True;SslMode=none;" &
+            "server=" & servername & ";" &
+            "User Id=" & user_login & ";" &
+            "password=" & password & ";" &
+            "database=" & database & ";"
 
-        Dim cnString As String = "Persist Security Info=True;" & _
-                    "server=" & strServer & ";" & _
-                    "User Id=" & strUser & ";" & _
-                    "database=" & strDatabase & ";" & _
-                    "password=" & strPwd & ""
-
-        Dim strQUERY As String = "SHOW TABLES FROM " & strDatabase & ""
+        Dim strQUERY As String = "SHOW TABLES FROM " & database & ""
         'Dim strQUERY As String = "SELECT DISTINCT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_SCHEMA =" & strDatabase & ""
 
         Dim table As DataTable = Nothing
-        Dim con As MySqlConnection = New MySqlConnection(cnString)
+        Dim con As MySqlConnection = New MySqlConnection(ConString)
         Dim cmd As New MySqlCommand
         Dim ds As New DataSet
         Dim ds2 As New DataSet
@@ -81,11 +84,21 @@ Public Class MySqlHelper
             da = New MySqlDataAdapter(strQUERY, con)
             da.Fill(ds2)
             table = ds2.Tables(0)
+
+            treeview1.Nodes.Clear()
             For Each dr2 In table.Rows
-                treeview1.Nodes.Add(dr2("Tables_in_" & strDatabase))
+                Dim node As New TreeNode
+                node.Text = dr2("Tables_in_" & database)
+                ds = MySqlHelper.LoadTableStructure_MySql(node.Text)
+
+                For Each dt As DataRow In ds.Tables(0).Rows
+                    node.Nodes.Add(dt(0))
+                Next
+                treeview1.Nodes.Add(node)
+                'treeview1.Nodes.Add(dr2("Tables_in_" & strDatabase))
             Next
-            Dim _systeme As Cls_Systeme = Cls_Systeme.getInstance
-            _systeme.CreateConnectionLog(strServer, strUser, strPwd, TypeDatabase.MYSQL)
+            'Dim _systeme As Cls_Systeme = Cls_Systeme.getInstance
+            '_systeme.CreateConnectionLog(strServer, strUser, strPwd, TypeDatabase.MYSQL)
             con.Close()
         Catch x As OleDbException
             slTables = Nothing
@@ -164,7 +177,7 @@ Public Class MySqlHelper
 
 #Region "Stored Procedure Fonctions "
 
-    Public Shared Function CreateStoreMySql(ByVal Name As String) As String
+    Public Shared Function Insert_Store(ByVal Name As String) As String
 
         Dim ds As DataSet = LoadTableStructure_MySql(Name)
 
@@ -187,22 +200,38 @@ Public Class MySqlHelper
             If dt(3).ToString = "PRI" Then
                 Id_table = dt(0).ToString()
             End If
-
         Next
 
         For Each dt As DataRow In ds.Tables(0).Rows
             If dt(0).ToString <> Id_table Then
-                If count < cap - 4 Then
+                If count < cap Then
 
-                    If (paramStore = "") Then
-                        paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
-                        champStore = "" & dt(0) & ""
-                        valueStore = "_" & dt(0)
-                    Else
-                        paramStore &= Chr(13) & Chr(9) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
-                        champStore &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & ""
-                        valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "_" & dt(0)
+                    If Not dt(0).ToString.Equals("ModifBy") _
+                        AndAlso Not dt(0).ToString.Equals("DateModif") Then
+
+                        If dt(0).ToString.Equals("DateCreated") Then
+                            If (paramStore = "") Then
+                                'paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                                champStore = "" & dt(0) & ""
+                                valueStore = "NOW()"
+                            Else
+                                'paramStore &= Chr(13) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                                champStore &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & ""
+                                valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "NOW()"
+                            End If
+                        Else
+                            If (paramStore = "") Then
+                                paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                                champStore = "" & dt(0) & ""
+                                valueStore = "_" & dt(0)
+                            Else
+                                paramStore &= Chr(13) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                                champStore &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & ""
+                                valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "_" & dt(0)
+                            End If
+                        End If
                     End If
+
                     count += 1
                 Else
                     Exit For
@@ -210,55 +239,43 @@ Public Class MySqlHelper
             End If
 
         Next
-        ' paramStore &= Chr(13) & Chr(9) & Chr(9) & "," & "@user" & " nvarchar(50)"
-        '  champStore &= Chr(13) & Chr(9) & Chr(9) & "," & "createdby"
-        champStore &= Chr(13) & Chr(9) & Chr(9) & "," & "datecreated"
-        ' valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "@user"
-        valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "NOW()"
-        Dim command As String = Chr(9) & "INSERT INTO " & Name & Chr(13) _
-                                & Chr(9) & Chr(9) & "(" & Chr(13) _
-                                & Chr(9) & Chr(9) & champStore & Chr(13) _
-                                & Chr(9) & ")" & Chr(13) _
-                                & Chr(9) & "VALUES" & Chr(13) _
-                                & Chr(9) & "(" & Chr(13) _
-                                & Chr(9) & Chr(9) & valueStore & Chr(13) _
-                                & Chr(9) & ");"
-        '' "USE MCI_db" & Chr(13) & "" & Chr(13) _&
-        ''/****** Object:  StoredProcedure [dbo].[SP_AddProfession]    Script Date: 08/12/2012 15:42:54 ******/
-        ''SET ANSI_NULLS ON
-        ''GO
-        ''SET QUOTED_IDENTIFIER ON
-        ''GO
-        '"USE MCI_db" & Chr(13) & "GO" & Chr(13) _
-        '                            & "/****** Object: StoredProcedure [dbo].[SP_Add" & objectname & "]    " & "Script Date: " & Now.Date & " " & Now.Date.TimeOfDay.ToString & " ******/" & Chr(13) _
-        '                            & "SET ANSI_NULLS ON" & Chr(13) _
-        '                            & "GO" & Chr(13) _
-        '                            & "SET QUOTED_IDENTIFIER ON" & Chr(13) _
-        '                            & "GO" & Chr(13) & Chr(13) _
-        '                            & 
+        Dim command As String = ""
+        command &= Chr(9) & "INSERT INTO " & Name & Chr(13)
+        command &= Chr(9) & "(" & Chr(13)
+        command &= Chr(9) & Chr(9) & champStore & Chr(13)
+        command &= Chr(9) & ")" & Chr(13)
+        command &= Chr(9) & "VALUES" & Chr(13)
+        command &= Chr(9) & "(" & Chr(13)
+        command &= Chr(9) & Chr(9) & valueStore & Chr(13)
+        command &= Chr(9) & ");"
 
         Dim objectname As String = Name.Substring(4, Name.Length - 4)
         objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
-        Dim store As String = "DELIMITER $$" & Chr(13) _
-                            & "CREATE PROCEDURE SP_Insert" & objectname & " " & Chr(13) _
-                            & Chr(9) & "(" & Chr(13) _
-                            & Chr(9) & Chr(9) & paramStore & Chr(13) _
-                            & Chr(9) & ")" & Chr(13) _
-                            & Chr(9) & "BEGIN " & Chr(13) _
-                            & command & Chr(13) _
-                            & Chr(9) & "SELECT LAST_INSERT_ID() AS ID;" & Chr(13) & Chr(13) _
-                            & "END$$" & Chr(13) & Chr(13) _
-                            & "DELIMITER ;" & Chr(13)
+
+        Dim store As String = ""
+        store &= "DELIMITER $$" & Chr(13)
+        store &= "DROP PROCEDURE IF EXISTS `SP_Insert_" & objectname & "`$$" & Chr(13)
+        store &= Chr(13)
+        store &= "CREATE PROCEDURE `SP_Insert_" & objectname & "` " & Chr(13)
+        store &= "(" & Chr(13)
+        store &= Chr(9) & paramStore & Chr(13)
+        store &= ")" & Chr(13)
+        store &= "BEGIN " & Chr(13)
+        store &= command & Chr(13)
+        store &= Chr(13)
+        store &= "SELECT LAST_INSERT_ID() AS ID;" & Chr(13)
+        store &= Chr(13)
+        store &= "END$$" & Chr(13)
+        store &= Chr(13)
+        store &= "DELIMITER ;" & Chr(13)
 
         Return store
     End Function
 
-    Public Shared Function UpdateStoreMySql(ByVal Name As String) As String
+    Public Shared Function Update_StoreMySql(ByVal Name As String) As String
 
         Dim ds As DataSet = LoadTableStructure_MySql(Name)
-
         Dim cap As Integer
-
         cap = ds.Tables(0).Rows.Count
 
         Dim count As Integer = 0
@@ -270,71 +287,84 @@ Public Class MySqlHelper
         Dim LevelOneSpecialChar As New List(Of String) From {"nvarchar", "varchar", "char", "nchar", "binary", "datetime2", "datetimeoffset", "time", "varbinary"}
         Dim LevelTwoSpecialChar As New List(Of String) From {"decimal", "numeric"}
 
-
-
         For Each dt As DataRow In ds.Tables(0).Rows
             If dt(3).ToString = "PRI" Then
                 Id_table = dt(0).ToString()
             End If
-
         Next
 
-
         For Each dt As DataRow In ds.Tables(0).Rows
-            If count < cap - 4 Then
-                If QuerySet = "" Then
-                    If dt(0) <> Id_table Then
-                        QuerySet = "" & dt(0) & "" & " " & "= " & "_" & dt(0)
+            'If dt(0).ToString <> Id_table Then
+            If count < cap Then
+                If Not dt(0).ToString.Equals("CreatedBy") _
+                        AndAlso Not dt(0).ToString.Equals("DateCreated") Then
+
+                    If dt(0).ToString.Equals("DateModif") Then
+                        If QuerySet = "" Then
+                            QuerySet = "" & Chr(9) & dt(0) & "" & " " & "= " & "NOW()"
+                        Else
+                            QuerySet &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & "" & " " & "= " & "NOW()"
+                        End If
+
+                        If (paramStore = "") Then
+                            'paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                        Else
+                            'paramStore &= Chr(13) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                        End If
+                    Else
+                        If QuerySet = "" Then
+                            If dt(0) <> Id_table Then
+                                QuerySet = "" & dt(0) & "" & " " & "= " & "_" & dt(0)
+                            End If
+                        Else
+                            If dt(0) <> Id_table Then
+                                QuerySet &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & "" & " " & "= " & "_" & dt(0)
+                            End If
+                        End If
+
+                            If (paramStore = "") Then
+                            paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                        Else
+                            paramStore &= Chr(13) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
+                        End If
                     End If
-                Else
-                    QuerySet &= Chr(13) & Chr(9) & Chr(9) & "," & "" & dt(0) & "" & " " & "= " & "_" & dt(0)
-                End If
-                If (paramStore = "") Then
-                    paramStore = "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
-
-                Else
-                    paramStore &= Chr(13) & Chr(9) & Chr(9) & "," & "IN _" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim), IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim), dt(1) & "(" & dt(3) & ")", dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"), dt(1))
 
                 End If
+
                 count += 1
             Else
                 Exit For
             End If
+            'End If
         Next
 
+        Dim command As String = ""
+        command &= Chr(9) & "UPDATE " & Name & Chr(13)
+        command &= Chr(9) & "SET" & Chr(13)
+        command &= Chr(9) & Chr(9) & QuerySet
 
-
-        paramStore &= Chr(13) & Chr(9) & Chr(9) & "," & "IN _user" & " varchar(50)"
-        QuerySet &= Chr(13) & Chr(9) & Chr(9) & "," & "Modifby " & "=" & "_user"
-        QuerySet &= Chr(13) & Chr(9) & Chr(9) & "," & "DateModif" & "=" & "NOW()" & Chr(13)
-        'valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "@user"
-        'valueStore &= Chr(13) & Chr(9) & Chr(9) & "," & "GETDATE()"
-        Dim command As String = Chr(9) & "UPDATE " & Name & Chr(13) _
-                                & Chr(9) & "SET" & Chr(13) & Chr(13) _
-                                & Chr(9) & Chr(9) & QuerySet & Chr(13)
-
-        '' "USE MCI_db" & Chr(13) & "GO" & Chr(13) _&
-        ''"/***Store Update For table  " & Name & "****/" & Chr(13) _ &
-        '' "CREATE PROCEDURE [dbo].[SP_Update" & StrConv(Name, VbStrConv.ProperCase) & "] " & Chr(13) _
         Dim objectname As String = Name.Substring(4, Name.Length - 4)
 
         objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
 
-        Dim store As String = "DELIMITER $$" & Chr(13) _
-                          & "CREATE PROCEDURE SP_Update" & objectname & " " & Chr(13) _
-                          & Chr(9) & "(" & Chr(13) _
-                          & Chr(9) & Chr(9) & paramStore & Chr(13) _
-                          & Chr(9) & ")" & Chr(13) _
-                          & Chr(9) & "BEGIN " & Chr(13) _
-                          & command & Chr(13) _
-                          & Chr(9) & "Where " & Id_table & " = " & "_" & Id_table & " ;" & Chr(13) & Chr(13) _
-                          & "END$$" & Chr(13) & Chr(13) _
-                          & "DELIMITER ;" & Chr(13)
+        Dim store As String = ""
+        store &= "DELIMITER $$" & Chr(13)
+        store &= "DROP PROCEDURE IF EXISTS `SP_Update_" & objectname & "`$$" & Chr(13)
+        store &= Chr(13)
+        store &= "CREATE PROCEDURE `SP_Update_" & objectname & "` " & Chr(13)
+        store &= "(" & Chr(13)
+        store &= Chr(9) & paramStore & Chr(13)
+        store &= ")" & Chr(13)
+        store &= "BEGIN " & Chr(13)
+        store &= command & Chr(13)
+        store &= Chr(9) & "WHERE " & Id_table & " = " & "_" & Id_table & " ;" & Chr(13)
+        store &= "END$$" & Chr(13)
+        store &= Chr(13)
+        store &= "DELIMITER ;" & Chr(13)
         Return store
     End Function
 
-    Public Shared Function DeleteStoreMySql(ByVal Name As String) As String
-
+    Public Shared Function Delete_StoreMySql(ByVal Name As String) As String
 
         Dim ds As DataSet = LoadTableStructure_MySql(Name)
 
@@ -353,31 +383,55 @@ Public Class MySqlHelper
             If dt(3).ToString = "PRI" Then
                 Id_table = dt(0).ToString()
                 Id_table_type = dt(1).ToString()
-
             End If
-
         Next
 
         Dim command As String = Chr(9) & "DELETE FROM " & Name
         Dim objectname As String = Name.Substring(4, Name.Length - 4)
         objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
-        Dim store As String = "DELIMITER $$" & Chr(13) _
-                            & "CREATE PROCEDURE SP_Delete" & objectname & " " & Chr(13) _
-                            & Chr(9) & "(" & Chr(13) _
-                            & Chr(9) & Chr(9) & "IN _ID " & Id_table_type & Chr(13) _
-                            & Chr(9) & ")" & Chr(13) _
-                            & "BEGIN" & Chr(13) _
-                            & command & Chr(13) _
-                            & Chr(9) & "WHERE " & Id_table & " = " & "_ID ;" & Chr(13) & Chr(13) _
-                            & "END$$" & Chr(13) & Chr(13) _
-                            & "DELIMITER ;" & Chr(13)
 
+        Dim store As String = ""
+        store &= "DELIMITER $$" & Chr(13)
+        store &= "DROP PROCEDURE IF EXISTS `SP_Delete_" & objectname & "`$$" & Chr(13)
+        store &= "CREATE PROCEDURE SP_Delete_" & objectname & " " & Chr(13)
+        store &= "(" & Chr(13)
+        store &= Chr(9) & "IN _ID " & Id_table_type & Chr(13)
+        store &= ")" & Chr(13)
+        store &= "BEGIN" & Chr(13)
+        store &= command & Chr(13)
+        store &= Chr(9) & "WHERE " & Id_table & " = " & "_ID ;" & Chr(13)
+        store &= "END$$" & Chr(13)
+        store &= "DELIMITER ;" & Chr(13)
+        Return store
+    End Function
 
+    Public Shared Function ListAll_StoreMySql(ByVal Name As String) As String
+        Dim ds As DataSet = LoadTableStructure_MySql(Name)
+
+        Dim cap As Integer
+
+        cap = ds.Tables(0).Rows.Count
+
+        Dim count As Integer = 0
+
+        Dim command As String = Chr(9) & "SELECT * FROM " & Name & ";"
+
+        Dim objectname As String = Name.Substring(4, Name.Length - 4)
+
+        objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
+        Dim store As String = ""
+        store &= "DELIMITER $$" & Chr(13)
+        store &= "DROP PROCEDURE IF EXISTS `SP_ListAll_" & objectname & "`$$" & Chr(13)
+        store &= "CREATE PROCEDURE SP_ListAll_" & objectname & " ()" & Chr(13)
+        store &= "BEGIN" & Chr(13)
+        store &= command & Chr(13)
+        store &= "END$$" & Chr(13)
+        store &= "DELIMITER ;" & Chr(13)
 
         Return store
     End Function
 
-    Public Shared Function SelectStoreMySql(ByVal Name As String) As String
+    Public Shared Function SelectByID_StoreMySql(ByVal Name As String) As String
 
         Dim ds As DataSet = LoadTableStructure_MySql(Name)
 
@@ -397,21 +451,23 @@ Public Class MySqlHelper
             End If
         Next
 
-        Dim command As String = Chr(9) & "SELECT *" & Chr(13) _
-                                & Chr(9) & "FROM " & Name
+        Dim command As String = Chr(9) & "SELECT * FROM " & Name
 
         Dim objectname As String = Name.Substring(4, Name.Length - 4)
         objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
-        Dim store As String = "DELIMITER $$" & Chr(13) _
-                            & "CREATE PROCEDURE SP_Select" & objectname & "_ByID " & Chr(13) & Chr(13) _
-                            & Chr(9) & "(" & Chr(13) _
-                            & Chr(9) & Chr(9) & "IN _ID " & Id_table_type & Chr(13) _
-                            & Chr(9) & ")" & Chr(13) _
-                            & "BEGIN" & Chr(13) _
-                            & command & Chr(13) _
-                            & Chr(9) & "WHERE " & Id_table & " = " & "_ID ;" & Chr(13) & Chr(13) _
-                            & "END$$" & Chr(13) & Chr(13) _
-                            & "DELIMITER ;" & Chr(13)
+
+        Dim store As String = ""
+        store &= "DELIMITER $$" & Chr(13)
+        store &= "DROP PROCEDURE IF EXISTS `SP_Select_" & objectname & "_ByID`$$" & Chr(13)
+        store &= "CREATE PROCEDURE `SP_Select_" & objectname & "_ByID` " & Chr(13)
+        store &= "(" & Chr(13)
+        store &= Chr(9) & "IN _" & Id_table & " " & Id_table_type & Chr(13)
+        store &= ")" & Chr(13)
+        store &= "BEGIN" & Chr(13)
+        store &= command & Chr(13)
+        store &= Chr(9) & "WHERE " & Id_table & " = " & "_" & Id_table & ";" & Chr(13)
+        store &= "END$$" & Chr(13)
+        store &= "DELIMITER ;" & Chr(13)
         Return store
     End Function
 
@@ -478,7 +534,7 @@ Public Class MySqlHelper
             Dim objectname As String = Name.Substring(4, Name.Length - 4)
             objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
             Dim store As String =
-                                "CREATE PROCEDURE [dbo].[SP_Select" & objectname & "_" & ListofIndex.Item(indexPosition) & "] " & Chr(13) _
+                                "CREATE PROCEDURE [dbo].[SP_Select_" & objectname & "_" & ListofIndex.Item(indexPosition) & "] " & Chr(13) _
                                 & Chr(9) & "(" & Chr(13) _
                                 & Chr(9) & Chr(9) & "@" & ListofIndex.Item(indexPosition) & " " & ListofIndexType.Item(index_li_type(indexPosition)) & Chr(13) _
                                 & Chr(9) & ")" & Chr(13) & Chr(13) _
@@ -495,31 +551,7 @@ Public Class MySqlHelper
         Return storeglobal
     End Function
 
-    Public Shared Function ListAllStoreMySql(ByVal Name As String) As String
-        Dim ds As DataSet = LoadTableStructure_MySql(Name)
-
-        Dim cap As Integer
-
-        cap = ds.Tables(0).Rows.Count
-
-        Dim count As Integer = 0
-
-        Dim command As String = Chr(9) & "SELECT *" & Chr(13) _
-                                & Chr(9) & "FROM " & Name & " ;"
-
-        Dim objectname As String = Name.Substring(4, Name.Length - 4)
-        objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
-        Dim store As String = "DELIMITER $$" & Chr(13) _
-                            & "CREATE PROCEDURE SP_ListAll_" & objectname & " ()" & Chr(13) & Chr(13) _
-                            & "BEGIN" & Chr(13) _
-                            & command & Chr(13) & Chr(13) _
-                            & "END$$" & Chr(13) & Chr(13) _
-                            & "DELIMITER ;" & Chr(13)
-
-        Return store
-    End Function
-
-    Private Shared Function ListAllByForeignKeyMySql(ByVal Name As String) As String
+    Public Shared Function ListAllByForeignKeyMySql(ByVal Name As String) As String
         Dim ds As DataSet = LoadTableStructure_MySql(Name)
         Dim cap As Integer = ds.Tables(1).Rows.Count
         Dim count As Integer = 0
@@ -537,8 +569,8 @@ Public Class MySqlHelper
             Id_table = dt(0).ToString()
         Next
 
-        For Each dt As DataRow In ds.Tables(6).Rows
-            If dt(0).ToString = "FOREIGN KEY" Then
+        For Each dt As DataRow In ds.Tables(0).Rows
+            If dt(0).ToString = "MUL" Then '"FOREIGN KEY" Then
                 ListofForeignKey.Add(dt(6).ToString)
                 countForeignKey = countForeignKey + 1
             End If
@@ -561,8 +593,7 @@ Public Class MySqlHelper
 
 
         For Each key As String In ListofForeignKey
-            Dim command As String = Chr(9) & "SELECT *" & Chr(13) _
-                                    & Chr(9) & "FROM " & Name
+            Dim command As String = Chr(9) & "SELECT * FROM " & Name
 
             Dim objectname As String = Name.Substring(4, Name.Length - 4)
             objectname = objectname.Substring(0, 1).ToUpper() & objectname.Substring(1, objectname.Length - 1)
@@ -584,659 +615,6 @@ Public Class MySqlHelper
 
         Return storeglobal
     End Function
-#End Region
-
-#Region "VB.Net Class Fonctions"
-    Public Shared Sub CreateFile(ByVal name As String, ByRef txt_PathGenerate_ScriptFile As TextBox, ByRef ListBox_NameSpace As ListBox)
-        Dim Id_table As String = ""
-        Dim _end As String
-        Dim ListofForeignKey As New List(Of String)
-        Dim countForeignKey As Integer = 0
-        Dim db As String = ""
-        Dim Lcasevalue As New List(Of String) From {"String"}
-        Dim nomClasse As String = name.Replace("tbl", "Cls").Replace("Tbl", "Cls").Replace("TBL", "Cls")
-
-        Dim txt_PathGenerate_Script As String = IIf(txt_PathGenerate_ScriptFile.Text.Trim <> "", txt_PathGenerate_ScriptFile.Text.Trim & "\SCRIPT\GENERIC_12\", Application.StartupPath & "\SCRIPT\GENERIC_12\")
-        Dim path As String = txt_PathGenerate_Script & nomClasse & ".vb"
-
-        Dim ListofIndex As New List(Of String)
-        Dim ListofIndexType As New List(Of String)
-        Dim index_li_type As New Hashtable
-        Dim countindex As Long = 0
-        Dim insertstring As String = ""
-        Dim updatestring As String = ""
-        Dim listoffound_virguleIndex As New List(Of String)
-        Dim header As String = "REM Generate By [GENERIC 12] Application *******" & Chr(13) _
-                               & "REM  Class " + nomClasse & Chr(13) & Chr(13) _
-                               & "REM Date:" & Date.Now.ToString("dd-MMM-yyyy H\h:i:s\m")
-        header &= ""
-        Dim content As String = "Public Class " & nomClasse & Chr(13) _
-                                 & "Implements IGeneral"
-
-        _end = "End Class" & Chr(13)
-        ' Delete the file if it exists.
-        If File.Exists(path) Then
-            File.Delete(path)
-        End If
-
-        REM on verifie si le repertoir existe bien       
-        If Not Directory.Exists(txt_PathGenerate_Script) Then
-            Directory.CreateDirectory(txt_PathGenerate_Script)
-        End If
-        ' Create the file.
-        Dim fs As FileStream = File.Create(path, 1024)
-        fs.Close()
-
-
-
-        Dim objWriter As New System.IO.StreamWriter(path, True)
-        objWriter.WriteLine(header)
-        If ListBox_NameSpace.Items.Count > 0 Then
-            For i As Integer = 0 To ListBox_NameSpace.Items.Count - 1
-                objWriter.WriteLine(ListBox_NameSpace.Items(i))
-            Next
-        End If
-        objWriter.WriteLine()
-        objWriter.WriteLine(content)
-        objWriter.WriteLine()
-        Dim _table As New Cls_Table()
-        Dim _systeme As Cls_Systeme = Cls_Systeme.getInstance
-        _table.Read(_systeme.currentDatabase.ID, name)
-
-        Dim cols As New List(Of String)
-        Dim types As New List(Of String)
-        Dim initialtypes As New List(Of String)
-        Dim length As New List(Of String)
-        Dim count As Integer = 0
-
-        Dim cap As Integer
-
-        cap = _table.ListofColumn.Count
-
-
-        Id_table = _table.ListofColumn.Item(0).Name
-
-        Dim nottoputforlist As New List(Of String) From {Id_table, "_isdirty", "_LogData"}
-
-        For Each _foreingkey As Cls_ForeignKey In _table.ListofForeinKey
-            ListofForeignKey.Add("_" & _foreingkey.Column.Name)
-            countForeignKey = countForeignKey + 1
-        Next
-
-        For Each _index As Cls_UniqueIndex In _table.ListofIndex
-            If _index.ListofColumn.Count = 1 Then
-                ListofIndexType.Add(_index.ListofColumn.Item(0).Type.VbName)
-                index_li_type.Add(ListofIndex.IndexOf(_index.ListofColumn.Item(0).Name), _index.ListofColumn.Item(0).Type.VbName)
-            Else
-
-            End If
-        Next
-
-        For Each _column As Cls_Column In _table.ListofColumn
-            If count < cap - 4 Then
-                cols.Add("_" & _column.Name)
-                types.Add(_column.Type.VbName)
-                initialtypes.Add(_column.Type.SqlServerName)
-                length.Add(_column.Length)
-                count += 1
-            Else
-                Exit For
-            End If
-        Next
-
-        cols.Add("_isdirty")
-        cols.Add("_LogData")
-        types.Add("Boolean")
-        types.Add("String")
-        initialtypes.Add("Byte")
-        initialtypes.Add("nvarchar")
-        objWriter.WriteLine("#Region ""Attribut""")
-        objWriter.WriteLine("Private _id As Long")
-        objWriter.WriteLine()
-        Try
-            For i As Int32 = 1 To cols.Count - 1
-                If Not nottoputforlist.Contains(cols(i)) Then
-                    insertstring &= ", " & cols(i)
-                    updatestring &= ", " & cols(i)
-                End If
-
-                objWriter.WriteLine("Private " & cols(i) & " As " & types(i))
-                If ListofForeignKey.Contains(cols(i)) Then
-                    objWriter.WriteLine("Private _" & cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1)) & " As " & "Cls_" & cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1)))
-                End If
-            Next
-        Catch ex As Exception
-
-        End Try
-        objWriter.WriteLine()
-        objWriter.WriteLine("#End Region")
-        objWriter.WriteLine()
-
-        objWriter.WriteLine("#Region ""New""")
-        objWriter.WriteLine("Public Sub New()")
-        objWriter.WriteLine("BlankProperties()")
-        objWriter.WriteLine("End Sub")
-        objWriter.WriteLine()
-        objWriter.WriteLine("Public Sub New(ByVal _idOne As Long)")
-        objWriter.WriteLine("Read(_idOne)")
-        objWriter.WriteLine("End Sub" & Chr(13))
-
-
-        For Each _index As Cls_UniqueIndex In _table.ListofIndex
-            If _index.ListofColumn.Count > 1 Then
-            Else
-                objWriter.WriteLine("Public Sub New(ByVal " & _index.ListofColumn.Item(0).Name & " As " & _index.ListofColumn.Item(0).Type.VbName & ")")
-                objWriter.WriteLine("Read_" & _index.ListofColumn.Item(0).Name & "(" & _index.ListofColumn.Item(0).Name & ")")
-                objWriter.WriteLine("End Sub " & Chr(13))
-            End If
-        Next
-
-
-        objWriter.WriteLine("#End Region")
-
-        objWriter.WriteLine()
-
-        objWriter.WriteLine("#Region ""Properties""")
-        objWriter.WriteLine("<AttributLogData(True,1)> _")
-        objWriter.WriteLine("Public ReadOnly Property ID() As Long Implements IGeneral.ID")
-        objWriter.WriteLine("Get")
-        objWriter.WriteLine("Return _id")
-        objWriter.WriteLine("End Get")
-        objWriter.WriteLine("End Property")
-        objWriter.WriteLine()
-
-        For i As Int32 = 1 To cols.Count - 3 ''On ne cree pas de property pour la derniere column
-            Dim propName As String = ""
-            Dim s As String() = cols(i).Split("_")
-            For j As Integer = 1 To s.Length - 1
-                propName &= StrConv(s(j), VbStrConv.ProperCase)
-            Next
-            'propName = StrConv(cols(i).Split("_")(1), VbStrConv.ProperCase) & StrConv(cols(i).Split("_")(2), VbStrConv.ProperCase)
-            Dim log As String = "<AttributLogData(True, " & i + 1 & ")> _"
-            Dim attrib As String = "Public Property  " & propName & " As " & types(i)
-
-            If cols(i) <> "_isdirty" Or cols(i) <> "_LogData" Then
-                objWriter.WriteLine(log)
-                objWriter.WriteLine(attrib)
-                objWriter.WriteLine("Get" & Chr(13) _
-                                    & " Return " & cols(i) & Chr(13) _
-                                    & "End Get")
-
-                If Lcasevalue.Contains(types(i)) Then
-                    objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")" & Chr(13) _
-                                  & " If LCase(Trim(" & cols(i) & ")) <> LCase(Trim(Value)) Then" & Chr(13) _
-                                  & "_isdirty = True " & Chr(13) _
-                                  & cols(i) & " = Trim(Value)" & Chr(13) _
-                                  & "End If" & Chr(13) _
-                                  & "End Set" & Chr(13) _
-                                  & "End Property")
-                Else
-                    objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")" & Chr(13) _
-                                  & " If " & cols(i) & " <> Value Then" & Chr(13) _
-                                  & "_isdirty = True " & Chr(13) _
-                                  & cols(i) & " = Value" & Chr(13) _
-                                  & "End If" & Chr(13) _
-                                  & "End Set" & Chr(13) _
-                                  & "End Property")
-                End If
-
-                objWriter.WriteLine()
-
-                If ListofForeignKey.Contains(cols(i)) Then
-                    Dim attributUsed As String = cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1))
-                    Dim ClassName As String = "Cls_" & cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1))
-                    objWriter.WriteLine("Public Property " & attributUsed & " As " & ClassName & Chr(13))
-                    objWriter.WriteLine("Get")
-                    objWriter.WriteLine("If Not (_" & attributUsed & " Is Nothing) Then" & Chr(13) _
-                                        & "If (_" & attributUsed & ".ID = 0) Or (_" & attributUsed & ".ID <>  " & cols(i) & ") Then" & Chr(13) _
-                                        & "_" & attributUsed & "= New " & ClassName & "(" & cols(i) & ")" & Chr(13) _
-                                        & "End If" & Chr(13) _
-                                        & "Else" & Chr(13) _
-                                        & "_" & attributUsed & "= New " & ClassName & "(" & cols(i) & ")" & Chr(13) _
-                                        & "End If" & Chr(13) & Chr(13) _
-                                        & "Return _" & attributUsed & Chr(13) _
-                                        & "End Get" & Chr(13) _
-                                        & "Set(ByVal value As " & ClassName & ")" & Chr(13) _
-                                        & "If Value Is Nothing Then" & Chr(13) _
-                                        & "_isdirty = True" & Chr(13) _
-                                        & cols(i) & " = 0" & Chr(13) _
-                                        & "Else" & Chr(13) _
-                                        & "If _" & attributUsed & ".ID <> Value.ID Then" & Chr(13) _
-                                        & "_isdirty = True" & Chr(13) _
-                                        & cols(i) & " = Value.ID" & Chr(13) _
-                                        & "End If" & Chr(13) _
-                                        & "End If" & Chr(13) _
-                                        & "End Set" & Chr(13) _
-                                        & "End Property" & Chr(13) _
-                                        )
-                    objWriter.WriteLine()
-                End If
-            End If
-            If initialtypes(i).ToString() = "image" Then
-                objWriter.WriteLine("Public Property " & cols(i).Substring(1, cols(i).Length - 1) & "String() As String")
-                objWriter.WriteLine("Get")
-                objWriter.WriteLine("If " & cols(i) & " IsNot Nothing Then")
-                objWriter.WriteLine("Return Encode(" & cols(i) & " )")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("Return """"")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End Get")
-                objWriter.WriteLine("Set(ByVal Value As String)")
-                objWriter.WriteLine(cols(i) & " = Decode(Value)")
-                objWriter.WriteLine("_isdirty = True")
-                objWriter.WriteLine("End Set")
-                objWriter.WriteLine("End Property")
-            End If
-
-        Next
-
-        With objWriter
-            .WriteLine("ReadOnly Property IsDataDirty() As Boolean")
-            .WriteLine("Get")
-            .WriteLine("Return _isdirty")
-            .WriteLine("End Get")
-            .WriteLine("End Property")
-            .WriteLine()
-        End With
-
-        With objWriter
-            .WriteLine("Public ReadOnly Property LogData() As String")
-            .WriteLine("Get")
-            .WriteLine("Return _LogData")
-            .WriteLine("End Get")
-            .WriteLine("End Property")
-        End With
-
-
-        objWriter.WriteLine("#End Region")
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("#Region "" Db Access """)
-        objWriter.WriteLine("Public Function Insert(ByVal usr As String) As Integer Implements IGeneral.Insert")
-        objWriter.WriteLine("_LogData = """"")
-
-
-        objWriter.WriteLine("_id = Convert.ToInt32(MySQLHelper.ExecuteScalar(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Insert" & nomClasse.Substring(4, nomClasse.Length - 4) & """" & insertstring & ", usr))")
-
-
-        objWriter.WriteLine("Return _id")
-        objWriter.WriteLine("End Function")
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("Public Function Update(ByVal usr As String) As Integer Implements IGeneral.Update")
-        objWriter.WriteLine("_LogData = """"")
-        objWriter.WriteLine("_LogData = GetObjectString()")
-        objWriter.WriteLine("Return MySQLHelper.ExecuteScalar(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Update" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id" & updatestring & ", usr)")
-        objWriter.WriteLine("End Function" & Chr(13))
-
-        objWriter.WriteLine("Private Sub SetProperties(ByVal dr As DataRow)" & Chr(13))
-        objWriter.WriteLine("_id = TypeSafeConversion.NullSafeLong(dr(""" & cols(0).Substring(1, cols(0).Length - 1) & """))")
-
-        For i As Int32 = 1 To cols.Count - 2
-
-            If cols(i) <> "_isdirty" Then
-                If types(i) = "DateTime" Then
-                    objWriter.WriteLine(cols(i) & " = " & "TypeSafeConversion.NullSafeDate(dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """))")
-                ElseIf initialtypes(i) = "image" Then
-                    objWriter.WriteLine(cols(i) & " = " & "dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """)")
-                Else
-                    objWriter.WriteLine(cols(i) & " = " & "TypeSafeConversion.NullSafe" & types(i) & "(dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """))")
-                End If
-            End If
-
-            If ListofForeignKey.Contains(cols(i)) Then
-                objWriter.WriteLine("_" & cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1)) & " = Nothing")
-
-            End If
-
-        Next
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("End Sub" & Chr(13))
-
-        objWriter.WriteLine("Private Sub BlankProperties()" & Chr(13))
-        objWriter.WriteLine("_id = 0")
-        For i As Int32 = 1 To cols.Count - 2
-
-            If types(i) <> "Boolean" Then
-                If types(i) = "DateTime" Or types(i) = "Date" Then
-                    objWriter.WriteLine(cols(i) & " = " & "Now")
-                Else
-                    If Lcasevalue.Contains(types(i)) Then
-                        objWriter.WriteLine(cols(i) & " = " & """""")
-                    ElseIf initialtypes(i) = "image" Then
-                        objWriter.WriteLine(cols(i) & " = Nothing")
-                    Else
-                        objWriter.WriteLine(cols(i) & " = " & "0")
-                    End If
-
-                End If
-            Else
-                objWriter.WriteLine(cols(i) & " = " & "False")
-            End If
-
-            If ListofForeignKey.Contains(cols(i)) Then
-                objWriter.WriteLine("_" & cols(i).Substring(ForeinKeyPrefix.Length + 1, cols(i).Length - (ForeinKeyPrefix.Length + 1)) & " = Nothing")
-            End If
-
-
-        Next
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("End Sub" & Chr(13))
-
-        objWriter.WriteLine("Public Function Read(ByVal _idpass As Long) As Boolean Implements IGeneral.Read")
-        objWriter.WriteLine("Try " & Chr(13))
-
-        objWriter.WriteLine("If _idpass <> 0 Then " & Chr(13) _
-                        & "Dim ds As DataSet = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(),""SP_Select" & nomClasse.Substring(4, nomClasse.Length - 4) & "_ByID"", _idpass)" & Chr(13) & Chr(13) _
-                        & "If ds.Tables(0).Rows.Count < 1 Then" & Chr(13) _
-                        & "BlankProperties()" & Chr(13) _
-                        & "Return False" & Chr(13) _
-                        & "End If" & Chr(13) & Chr(13) _
-                        & "SetProperties(ds.tables(0).rows(0))" & Chr(13) _
-                        & "Else" & Chr(13) _
-                        & "BlankProperties()" & Chr(13) _
-                        & "End If" & Chr(13) _
-                        & "Return True" & Chr(13) _
-                        )
-
-        objWriter.WriteLine("Catch ex As Exception" & Chr(13))
-        objWriter.WriteLine("Throw ex" & Chr(13))
-        objWriter.WriteLine("End Try" & Chr(13))
-        objWriter.WriteLine("End Function" & Chr(13))
-
-        For Each _index As Cls_UniqueIndex In _table.ListofIndex
-            If _index.ListofColumn.Count = 1 Then
-                objWriter.WriteLine("Public Function Read_" & _index.ListofColumn.Item(0).Name & "(ByVal " & _index.ListofColumn.Item(0).Name & " As " & _index.ListofColumn.Item(0).Type.VbName & ") As Boolean")
-                objWriter.WriteLine("Try " & Chr(13))
-                objWriter.WriteLine("If " & _index.ListofColumn.Item(0).Name & " <> """" Then ")
-                objWriter.WriteLine("Dim ds as Dataset = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Select" & nomClasse.Substring(4, nomClasse.Length - 4) & """, " & _index.ListofColumn.Item(0).Name & ")" & Chr(13))
-                objWriter.WriteLine("If ds.tables(0).Rows.Count < 1 Then")
-                objWriter.WriteLine("BlankProperties()")
-                objWriter.WriteLine("Return False")
-                objWriter.WriteLine("End If" & Chr(13))
-                objWriter.WriteLine("SetProperties(ds.Tables(0).Rows(0))")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("BlankProperties()")
-                objWriter.WriteLine("End If" & Chr(13))
-                objWriter.WriteLine("Return True")
-                objWriter.WriteLine("Catch ex As Exception" & Chr(13))
-                objWriter.WriteLine("Throw ex" & Chr(13))
-                objWriter.WriteLine("End Try" & Chr(13))
-                objWriter.WriteLine("End Function" & Chr(13) & Chr(13))
-            Else
-                Dim _strOfIndexToUse As String = String.Empty
-                Dim _strOfValueToUse As String = String.Empty
-                Dim _strParameterToUse As String = String.Empty
-                Dim ind As Integer = 0
-                For Each _column As Cls_Column In _index.ListofColumn
-                    If _strOfIndexToUse.Length = 0 Then
-                        _strOfIndexToUse = _column.Name
-                        _strOfValueToUse = "ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse = "_value" & ind
-                    Else
-                        _strOfIndexToUse += "_" & _column.Name
-                        _strOfValueToUse += ", ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse += ", value" & ind
-                    End If
-                    ind = ind + 1
-                Next
-                objWriter.WriteLine("Public Function Read_" & _strOfIndexToUse & "(" & _strOfValueToUse & ") As Boolean")
-                objWriter.WriteLine("Try " & Chr(13))
-    '        objWriter.WriteLine("If " & ListofIndex(i) & " <> """" Then ")
-                objWriter.WriteLine("Dim ds As Data.DataSet = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Select" & nomClasse.Substring(4, nomClasse.Length - 4) & "_" & _strOfIndexToUse & """, " & _strParameterToUse & ")")
-                objWriter.WriteLine("If ds.tables(0).Rows.Count < 1 Then")
-                objWriter.WriteLine("BlankProperties()")
-                objWriter.WriteLine("Return False")
-                objWriter.WriteLine("End If" & Chr(13))
-
-                objWriter.WriteLine("SetProperties(ds.Tables(0).Rows(0))")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("BlankProperties()")
-    '        objWriter.WriteLine("End If" & Chr(13))
-
-                objWriter.WriteLine("Return True")
-
-                objWriter.WriteLine("Catch ex As Exception" & Chr(13))
-                objWriter.WriteLine("Throw ex" & Chr(13))
-                objWriter.WriteLine("End Try" & Chr(13))
-                objWriter.WriteLine("End Function" & Chr(13) & Chr(13))
-            End If
-        Next
-
-        objWriter.WriteLine("Public Sub Delete() Implements IGeneral.Delete" & Chr(13) _
-                            & "Try" & Chr(13) _
-                            & "MySQLHelper.ExecuteNonQuery(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Delete" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id)" & Chr(13) & Chr(13) _
-                            & "Catch ex As SqlClient.SqlException" & Chr(13) _
-                            & "Throw New System.Exception(ex.ErrorCode)" & Chr(13) _
-                            & "End Try" & Chr(13) _
-                            & "End Sub" & Chr(13)
-                            )
-
-        objWriter.WriteLine("Public Function Refresh() As Boolean Implements IGeneral.Refresh" & Chr(13) _
-                             & "If _id = 0 Then" & Chr(13) _
-                             & "Return False" & Chr(13) _
-                             & "Else" & Chr(13) _
-                             & "Read(_id)" & Chr(13) _
-                             & "Return True" & Chr(13) _
-                             & "End If" & Chr(13) _
-                             & "End Function" & Chr(13) _
-                             )
-
-        objWriter.WriteLine("Public Function Save(ByVal usr As String) As Integer Implements IGeneral.Save" & Chr(13) _
-                             & "If _isdirty Then" & Chr(13) _
-                             & "Validation()" & Chr(13) & Chr(13) _
-                             & "If _id = 0 Then" & Chr(13) _
-                             & "Return Insert(usr)" & Chr(13) _
-                             & "Else" & Chr(13) _
-                             & "If _id > 0 Then" & Chr(13) _
-                             & "Return Update(usr)" & Chr(13) _
-                             & "Else" & Chr(13) _
-                             & "_id = 0" & Chr(13) _
-                             & "Return False" & Chr(13) _
-                             & "End If" & Chr(13) _
-                             & "End If" & Chr(13) _
-                             & "End If" & Chr(13) & Chr(13) _
-                             & "_isdirty = False" & Chr(13) _
-                             & "End Function"
-                             )
-
-
-        objWriter.WriteLine("#End Region")
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("#Region "" Search """)
-
-        objWriter.WriteLine("Public Function Search() As System.Collections.ICollection Implements IGeneral.Search" & Chr(13) _
-                            & "Return SearchAll()" & Chr(13) _
-                            & "End Function" & Chr(13)
-                            )
-
-
-        objWriter.WriteLine("Public Shared Function SearchAll() As List(Of " & nomClasse & ")" & Chr(13) _
-                            & "Try " & Chr(13) _
-                            & "Dim objs As New List(Of " & nomClasse & ")" & Chr(13) _
-                            & "Dim r As Data.DataRow" & Chr(13) _
-                            & "Dim ds As Data.DataSet = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(), ""SP_ListAll_" & nomClasse.Substring(4, nomClasse.Length - 4) & """)" & Chr(13) _
-                            & "For Each r In ds.Tables(0).Rows" & Chr(13) _
-                            & "Dim obj As New " & nomClasse & Chr(13) & Chr(13) _
-                            & "obj.SetProperties(r)" & Chr(13) & Chr(13) _
-                            & "objs.Add(obj)" & Chr(13) _
-                            & "Next r" & Chr(13) _
-                            & "Return objs" & Chr(13)
-                            )
-
-
-        objWriter.WriteLine("Catch ex As Exception" & Chr(13))
-        objWriter.WriteLine("Throw ex" & Chr(13))
-        objWriter.WriteLine("End Try" & Chr(13))
-        objWriter.WriteLine("End Function" & Chr(13) & Chr(13))
-        objWriter.WriteLine("#End Region")
-
-        objWriter.WriteLine()
-        objWriter.WriteLine("#Region "" Other Methods """)
-
-
-        For Each _index As Cls_UniqueIndex In _table.ListofIndex
-            If _index.ListofColumn.Count = 1 Then
-                objWriter.WriteLine("Private Function FoundAlreadyExist" & "_" & _index.ListofColumn.Item(0).Name & "(ByVal _value As " & _index.ListofColumn.Item(0).Type.VbName & ") As Boolean ")
-                objWriter.WriteLine("Dim ds As Data.DataSet = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Select" & nomClasse.Substring(4, nomClasse.Length - 4) & "_" & _index.ListofColumn.Item(0).Name & """, _value)")
-                objWriter.WriteLine(" If ds.Tables(0).Rows.Count < 1 Then")
-                objWriter.WriteLine(" Return False")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("If _id = 0 Then")
-                objWriter.WriteLine("Return True")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine(" If ds.Tables(0).Rows(0).Item(""" & Id_table & """) <> _id Then")
-                objWriter.WriteLine("Return True")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("Return False")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End Function" & Chr(13) & Chr(13))
-            Else
-                Dim _strOfIndexToUse As String = String.Empty
-                Dim _strOfValueToUse As String = String.Empty
-                Dim _strParameterToUse As String = String.Empty
-                Dim ind As Integer = 0
-                For Each _column In _index.ListofColumn
-                    If _strOfIndexToUse.Length = 0 Then
-                        _strOfIndexToUse = _column.Name
-                        _strOfValueToUse = "ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse = "_value" & ind
-                    Else
-                        _strOfIndexToUse += "_" & _column.Name
-                        _strOfValueToUse += ", ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse += ", value" & ind
-                    End If
-                    ind = ind + 1
-                Next
-                objWriter.WriteLine("Private Function FoundAlreadyExist" & "_" & _strOfIndexToUse & "(" & _strOfValueToUse & ") As Boolean ")
-                objWriter.WriteLine("Try" & Chr(13))
-                objWriter.WriteLine("Dim ds As Data.DataSet = MySQLHelper.ExecuteDataset(MySQLHelperParameterCache.BuildConfigDB(), ""SP_Select" & nomClasse.Substring(4, nomClasse.Length - 4) & "_" & _strOfIndexToUse & """, " & _strParameterToUse & ")")
-
-                objWriter.WriteLine(" If ds.Tables(0).Rows.Count < 1 Then")
-                objWriter.WriteLine(" Return False")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("If _id = 0 Then")
-                objWriter.WriteLine("Return True")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine(" If ds.Tables(0).Rows(0).Item(""" & Id_table & """) <> _id Then")
-                objWriter.WriteLine("Return True")
-                objWriter.WriteLine("Else")
-                objWriter.WriteLine("Return False")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End If")
-                objWriter.WriteLine("End If" & Chr(13))
-                objWriter.WriteLine("Catch ex As Exception" & Chr(13))
-                objWriter.WriteLine("Throw ex" & Chr(13))
-                objWriter.WriteLine("End Try" & Chr(13))
-                objWriter.WriteLine("End Function" & Chr(13) & Chr(13))
-            End If
-        Next
-
-
-        objWriter.WriteLine("Private Sub Validation() " & Chr(13))
-        Dim stringlistforvalidation As New List(Of String) From {"String"}
-        Dim decimalintegerforvalidation As New List(Of String) From {"Integer", "Long", "Decimal"}
-
-
-
-        For i As Int32 = 1 To cols.Count - 2
-            If stringlistforvalidation.Contains(types(i)) Then
-                objWriter.WriteLine("If " & cols(i) & " = """" Then " & Chr(13) _
-                                    & "Throw (New System.Exception("" " & cols(i).Substring(1, cols(i).Length - 1).ToString.ToLower & " obligatoire""))" & Chr(13) _
-                                    & "End If"
-                                    )
-                objWriter.WriteLine()
-                objWriter.WriteLine("If Len(" & cols(i) & ") > " & length(i) & " Then" & Chr(13) _
-                                    & "Throw (New System.Exception("" " & "Trop de caractères insérés pour" & cols(i).Substring(1, cols(i).Length - 1).ToString.ToLower & "  (la longueur doit être inférieure a " & length(i) & " caractères.  )""))" & Chr(13) _
-                                    & "End If"
-                                    )
-                objWriter.WriteLine()
-            End If
-
-            If decimalintegerforvalidation.Contains(types(i)) Then
-                If ListofForeignKey.Contains(cols(i)) Then
-                    objWriter.WriteLine("If " & cols(i) & " = 0 Then " & Chr(13) _
-                                  & "Throw (New System.Exception("" " & cols(i).Substring(4, cols(i).Length - 4).ToString.ToLower & " obligatoire""))" & Chr(13) _
-                                  & "End If"
-                                  )
-                    objWriter.WriteLine()
-                Else
-                    objWriter.WriteLine("If " & cols(i) & " = 0 Then " & Chr(13) _
-                                   & "Throw (New System.Exception("" " & cols(i).Substring(1, cols(i).Length - 1).ToString.ToLower & " obligatoire.""))" & Chr(13) _
-                                   & "End If"
-                                   )
-                    objWriter.WriteLine()
-                End If
-            End If
-
-
-        Next
-
-        objWriter.WriteLine()
-
-        For Each _index As Cls_UniqueIndex In _table.ListofIndex
-            If _index.ListofColumn.Count = 1 Then
-                objWriter.WriteLine("If  FoundAlreadyExist" & "_" & _index.ListofColumn.Item(0).Name & "(" & _index.ListofColumn.Item(0).Type.VbName & ") Then" & Chr(13) _
-                                  & "Throw (New System.Exception(""Ce " & _index.ListofColumn.Item(0).Name & " est déjà enregistré.""))" & Chr(13) _
-                                  & "End If"
-                                 )
-                objWriter.WriteLine()
-            Else
-                Dim _strOfIndexToUse As String = String.Empty
-                Dim _strOfValueToUse As String = String.Empty
-                Dim _strParameterToUse As String = String.Empty
-                Dim _parametervalueToUse As String = String.Empty
-                Dim ind As Integer = 0
-                For Each _column In _index.ListofColumn
-                    If _strOfIndexToUse.Length = 0 Then
-                        _strOfIndexToUse = _column.Name
-                        _parametervalueToUse = _column.Name
-                        _strOfValueToUse = "ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse = "_value" & ind
-                    Else
-                        _strOfIndexToUse += "_" & _column.Name
-                        _parametervalueToUse += ", " & _column.Name
-                        _strOfValueToUse += ", ByVal _value" & ind & " As " & _column.Type.VbName
-                        _strParameterToUse += ", value" & ind
-                    End If
-                Next
-                objWriter.WriteLine("If FoundAlreadyExit_" & _strOfIndexToUse & "(" & _parametervalueToUse & ") Then" & Chr(13) _
-                                   & "Throw (New System.Exception(""Cette combinaison " & _strOfIndexToUse & " est déjà enregistrée.""))" & Chr(13) _
-                                   & "End If"
-                                   )
-                objWriter.WriteLine()
-            End If
-        Next
-
-        objWriter.WriteLine("End Sub" & Chr(13))
-
-        objWriter.WriteLine("Public Function Encode(ByVal str As Byte()) As String")
-        objWriter.WriteLine("Return Convert.ToBase64String(str)")
-        objWriter.WriteLine("End Function")
-        objWriter.WriteLine()
-
-        objWriter.WriteLine("Public Function Decode(ByVal str As String) As Byte()")
-        objWriter.WriteLine("Dim decbuff As Byte() = Convert.FromBase64String(str)")
-        objWriter.WriteLine("Return decbuff")
-        objWriter.WriteLine("End Function")
-        objWriter.WriteLine()
-
-        objWriter.WriteLine(" Public Function GetObjectString() As String Implements IGeneral.GetObjectString" & Chr(13) _
-                         & "Dim _old As New " & nomClasse & "(Me.ID)" & Chr(13) & Chr(13) _
-                         & "Return LogStringBuilder.BuildLogStringChangesOnly(_old,Me)" & Chr(13) _
-                         & "End Function" & Chr(13) _
-                         )
-        objWriter.WriteLine("#End Region")
-        objWriter.WriteLine()
-        objWriter.WriteLine(_end)
-        objWriter.WriteLine()
-        objWriter.Close()
-    End Sub
 #End Region
 
 #Region "Java Class Fonctions"
@@ -1378,7 +756,7 @@ Public Class MySqlHelper
 
         objWriter.WriteLine()
 
-      
+
         objWriter.WriteLine("public " & nomUpperClasse & "(long id)" & " {")
         objWriter.WriteLine(" this();")
         objWriter.WriteLine("this.id = id;")
@@ -2411,11 +1789,9 @@ Public Class MySqlHelper
         '}
 
     End Sub
-
 #End Region
 
 #Region "Php Fonctions"
-
     Public Shared Sub CreatePHPClass(ByVal name As String, ByRef txt_PathGenerate_ScriptFile As TextBox, ByRef ListBox_NameSpace As ListBox)
         Dim Id_table As String = ""
         Dim _end As String
@@ -2731,7 +2107,6 @@ Public Class MySqlHelper
         objWriter.Close()
 
     End Sub
-
 #End Region
 
 

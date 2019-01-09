@@ -3,6 +3,7 @@ Imports System.IO
 Imports Microsoft.SqlServer
 Imports Microsoft.SqlServer.Management.Common
 Imports Microsoft.SqlServer.Management.Smo
+Imports MySql.Data.MySqlClient
 
 Public Class FormGeneric
 
@@ -12,16 +13,18 @@ Public Class FormGeneric
             Btn_GenererScript.Enabled = False
             TabControl_Form.DeselectTab(TabBaseDeDonnees)
             TabControl_Form.SelectTab(TabParametre)
+            SetLabelInfoTemplate()
+            SetLabelInfoPageWeb()
             'FillComboPrefixStoredProcedure()
             '_systeme.CleanData()
             'SetupReportGeneration()
             'SetupCurrentPrefix()
             'ispossible = True
-            rcmb_DatabaseName.Items.Add("CREATE ")
-            rcmb_DatabaseName.Items.Add("UPDATE ")
-            CB_ActionStoreProcedure.SelectedIndex = 0
+            'rcmb_DatabaseName.Items.Add("CREATE ")
+            'rcmb_DatabaseName.Items.Add("UPDATE ")
+            'CB_ActionStoreProcedure.SelectedIndex = 0
+            ddl_PrefixStoredProcedure.SelectedIndex = 0
 
-            LoadInstanceSQLServer()
         Catch ex As Exception
             MessageBox.Show("ERREUR:" & ex.Message, "Erreur", MessageBoxButtons.OK)
             Error_Log(ex)
@@ -36,33 +39,35 @@ Public Class FormGeneric
         Dim dr As Data.DataRow = Nothing
 
         Try
-            ''get sql server instances in to DataTable object
-            Dim servers As Sql.SqlDataSourceEnumerator = SqlDataSourceEnumerator.Instance
+            If rbtn_SqlServer.Checked Then
+                ''get sql server instances in to DataTable object
+                Dim servers As Sql.SqlDataSourceEnumerator = SqlDataSourceEnumerator.Instance
 
-            ' Check if datatable is empty
-            If dt.Rows.Count = 0 Then
-                ' Get a datatable with info about SQL Server 2000 and 2005 instances
-                dt = servers.GetDataSources()
+                ' Check if datatable is empty
+                If dt.Rows.Count = 0 Then
+                    ' Get a datatable with info about SQL Server 2000 and 2005 instances
+                    dt = servers.GetDataSources()
 
-                ' List that will be combobox’s datasource   
-                Dim listServers As List(Of String) = New List(Of String)
-                ' For each element in the datatable add a new element in the list
+                    ' List that will be combobox’s datasource   
+                    Dim listServers As List(Of String) = New List(Of String)
+                    ' For each element in the datatable add a new element in the list
 
-                For Each rowServer As DataRow In dt.Rows
-                    ' SQL Server instance could have instace name or only server name,
-                    ' check this for show the name
-                    If String.IsNullOrEmpty(rowServer("InstanceName").ToString()) Then
-                        If rowServer("ServerName").ToString().Equals("JFDUVERS-PC") Then
-                            listServers.Add(rowServer("ServerName").ToString() & "\MSSQLSERVER_08R2")
+                    For Each rowServer As DataRow In dt.Rows
+                        ' SQL Server instance could have instace name or only server name,
+                        ' check this for show the name
+                        If String.IsNullOrEmpty(rowServer("InstanceName").ToString()) Then
+                            If rowServer("ServerName").ToString().Equals("JFDUVERS-PC") Then
+                                listServers.Add(rowServer("ServerName").ToString() & "\MSSQLSERVER_08R2")
+                            Else
+                                listServers.Add(rowServer("ServerName").ToString())
+                            End If
                         Else
-                            listServers.Add(rowServer("ServerName").ToString())
+                            listServers.Add(rowServer("ServerName") & "\" & rowServer("InstanceName"))
                         End If
-                    Else
-                        listServers.Add(rowServer("ServerName") & "\" & rowServer("InstanceName"))
-                    End If
-                Next
-                'Set servers list to combobox’s datasource
-                Me.cmb_ServerName.DataSource = listServers
+                    Next
+                    'Set servers list to combobox’s datasource
+                    Me.cmb_ServerName.DataSource = listServers
+                End If
             End If
         Catch ex As System.Data.SqlClient.SqlException
             MsgBox(ex.Message, MsgBoxStyle.Exclamation, "Error!")
@@ -82,15 +87,47 @@ Public Class FormGeneric
 #Region "INTERFACE WEB"
 
     Private Sub RB_Template_AdminLTE_Master_CheckedChanged(sender As Object, e As EventArgs) Handles RB_Template_AdminLTE_Master.CheckedChanged, RB_Template_Inspinia.CheckedChanged, RB_Template_CleanZone.CheckedChanged
+        SetLabelInfoTemplate()
+    End Sub
+
+    Private Sub SetLabelInfoTemplate()
         Try
             If RB_Template_AdminLTE_Master.Checked Then
                 Me.PictureBox_Template.Image = Global.GENERIC_V16.My.Resources.Resources.AdminLTE_Master_fw
+                Label_TemplateWebPage.Text = "" & RB_Template_AdminLTE_Master.Text
 
             ElseIf RB_Template_Inspinia.Checked Then
                 Me.PictureBox_Template.Image = Global.GENERIC_V16.My.Resources.Resources.Inspinia_Template_fw
+                Label_TemplateWebPage.Text = "" & RB_Template_Inspinia.Text
 
             ElseIf RB_Template_CleanZone.Checked Then
                 Me.PictureBox_Template.Image = Global.GENERIC_V16.My.Resources.Resources.CleanZone_Template_fw
+                Label_TemplateWebPage.Text = "" & RB_Template_CleanZone.Text
+
+            End If
+        Catch ex As Exception
+            MessageBox.Show("ERREUR:" & ex.Message, "Erreur", MessageBoxButtons.OK)
+            Error_Log(ex)
+        End Try
+    End Sub
+
+    Private Sub RB_PageWebVBNET_CheckedChanged(sender As Object, e As EventArgs) Handles RB_PageWebVBNET.CheckedChanged, RB_PageWebPHP.CheckedChanged, RB_PageWebCSharpNET.CheckedChanged, RB_PageWebJSP.CheckedChanged
+        SetLabelInfoPageWeb()
+    End Sub
+
+    Private Sub SetLabelInfoPageWeb()
+        Try
+            If RB_PageWebVBNET.Checked Then
+                Label_PageWebTechnologie.Text = "" & RB_PageWebVBNET.Text
+
+            ElseIf RB_PageWebPHP.Checked Then
+                Label_PageWebTechnologie.Text = "" & RB_PageWebPHP.Text
+
+            ElseIf RB_PageWebCSharpNET.Checked Then
+                Label_PageWebTechnologie.Text = "" & RB_PageWebCSharpNET.Text
+
+            ElseIf RB_PageWebJSP.Checked Then
+                Label_PageWebTechnologie.Text = "" & RB_PageWebJSP.Text
 
             End If
         Catch ex As Exception
@@ -131,20 +168,24 @@ Public Class FormGeneric
                     SqlServerHelper.LoadUserTablesSchema(txt_ServerName.Text.Trim, Txt_Login.Text.Trim, Txt_Password.Text, txt_DatabaseName.Text, TreeView1)
 
                 ElseIf rbtn_MySql.Checked Then
-                    MySqlManager.LoadUserTablesSchema(TreeView1)
-                    MySqlManager.InitializeDb()
+                    Dim DatabaseName As String = txt_DatabaseName.Text
+                    txt_LibraryName.Text = DatabaseName.Replace("db", "") + "Library"
+                    MySqlHelper.LoadUserTablesSchema_MySql(TreeView1)
+                    'MySqlManager.LoadUserTablesSchema(TreeView1)
+
+                    'MySqlManager.InitializeDb()
                     'BackgroundWorker1.RunWorkerAsync()
 
-                    'ElseIf rbtn_PostGres.Checked Then
+                ElseIf rbtn_PostGres.Checked Then
                     '    txt_LibraryName.Text = txt_DatabaseName.Text + "Library"
                     '    PostgresSqlManager.LoadUserTablesSchema(TreeView1)
                     '    PostgresSqlManager.InitializeDb()
                     '    BackgroundWorker1.RunWorkerAsync()
 
-                    'ElseIf rbtn_Oracle.Checked Then
+                ElseIf rbtn_Oracle.Checked Then
 
                 Else
-                    MessageBox.Show("Pas de base de donnees selectionnee")
+                    MessageBox.Show("Pas de base de données selectionnée")
                 End If
 
                 Btn_GenererScript.Enabled = True
@@ -193,6 +234,7 @@ Public Class FormGeneric
     Private Sub Btn_ConnexionServerName_Click(sender As Object, e As EventArgs) Handles Btn_ConnexionServerName.Click
         txt_ServerName.Text = cmb_ServerName.Text
         txt_DatabaseName.Text = rcmb_DatabaseName.Text
+        Label_TableNameSelected.Text = rcmb_DatabaseName.Text
         Try
             Application.DoEvents()
             If rbtn_Oracle.Checked Then
@@ -228,31 +270,38 @@ Public Class FormGeneric
             End If
 
             'REM MySql
-            'If rbtn_MySql.Checked Then
-            '    Try
-            '        Dim myConStr As String = "Data Source=" & cmb_server.Text & ";User Id=" & Txt_Login.Text & ";Pwd=" & Txt_Password.Text & ";"
-            '        Dim myConnection As New MySqlConnection(myConStr)
-            '        myConnection.Open()
-            '        Dim cmd As New MySqlCommand
-            '        cmd.CommandText = "SHOW DATABASES"
-            '        cmd.CommandType = CommandType.Text
-            '        cmd.Connection = myConnection
-            '        Dim ds As New DataSet
-            '        Dim da As MySqlDataAdapter
-            '        da = New MySqlDataAdapter(cmd)
-            '        da.Fill(ds)
-            '        cmd.Parameters.Clear()
-            '        myConnection.Close()
-            '        For Each row As DataRow In ds.Tables(0).Rows
-            '            If Not rcmb_DatabaseName.Items.Contains(row(0)) Then
-            '                rcmb_DatabaseName.Items.Add(row(0))
-            '            End If
+            If rbtn_MySql.Checked Then
+                Try
+                    Dim myConStr As String = ""
+                    myConStr = "Persist Security Info=True;SslMode=none;"
+                    myConStr &= "server=" & cmb_ServerName.Text & ";"
+                    'myConStr &= "database=" & _cat & ";"
+                    myConStr &= "User Id=" & Txt_Login.Text & ";"
+                    myConStr &= "password=" & Txt_Password.Text & ";"
 
-            '        Next
-            '    Catch ex As Exception
-            '        MessageBox.Show(ex.Message)
-            '    End Try
-            'End If
+                    Dim myConnection As New MySqlConnection(myConStr)
+                    myConnection.Open()
+                    Dim cmd As New MySqlCommand
+                    cmd.CommandText = "SHOW DATABASES"
+                    cmd.CommandType = CommandType.Text
+                    cmd.Connection = myConnection
+                    Dim ds As New DataSet
+                    Dim da As MySqlDataAdapter
+                    da = New MySqlDataAdapter(cmd)
+                    da.Fill(ds)
+                    cmd.Parameters.Clear()
+                    myConnection.Close()
+                    rcmb_DatabaseName.Items.Clear()
+                    For Each row As DataRow In ds.Tables(0).Rows
+                        If Not rcmb_DatabaseName.Items.Contains(row(0)) Then
+                            rcmb_DatabaseName.Items.Add(row(0))
+                        End If
+
+                    Next
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message)
+                End Try
+            End If
 
             'REM ProGres SQL
             'If rbtn_PostGres.Checked Then
@@ -298,6 +347,21 @@ Public Class FormGeneric
         End If
     End Sub
 
+    Private Sub rbtn_SqlServer_CheckedChanged(sender As Object, e As EventArgs) Handles rbtn_SqlServer.CheckedChanged
+        cmb_ServerName.Text = "localhost"
+        Txt_Login.Text = "sa"
+        Txt_Password.Text = "123@pass"
+    End Sub
+
+    Private Sub rbtn_MySql_CheckedChanged(sender As Object, e As EventArgs) Handles rbtn_MySql.CheckedChanged
+        cmb_ServerName.Text = "localhost"
+        Txt_Login.Text = "root"
+        Txt_Password.Text = "pass"
+    End Sub
+
+    Private Sub cmb_ServerName_DropDown(sender As Object, e As EventArgs) Handles cmb_ServerName.DropDown
+        LoadInstanceSQLServer()
+    End Sub
 
 #Region "Folder Browser"
     Public Sub Folder_Browser_Dialog(ByVal _FolderBrowserDialog As FolderBrowserDialog, ByVal _Textbox As TextBox)
@@ -369,13 +433,13 @@ Public Class FormGeneric
     Private Sub Btn_GenererScript_Click(sender As Object, e As EventArgs) Handles Btn_GenererScript.Click
         Try
             If rbtn_SqlServer.Checked Then
-                GenerateScriptForSqlServer() 's, supdate, sdelete, slistall, slistallforeign, sselectindex, sselect, ssupdateparentaddchild, ssupdateparentremovechild, slistallchildinparent, slistallchildnotintparent, sselectanycolumn)
+                GenerateScript_For_SQLServer()
+            ElseIf rbtn_MySql.Checked Then
+                GenerateScript_For_MySql()
 
                 'ElseIf rbtn_Oracle.Checked Then
                 '    GenerateScriptForOracle(s, supdate, sdelete, slistall, slistallforeign, sselectindex, sselect)
 
-                'ElseIf rbtn_MySql.Checked Then
-                '    GenerateScriptForMySql(s, supdate, sdelete, slistall, slistallforeign, sselectindex, sselect, slistallPagination)
                 'ElseIf rbtn_PostGres.Checked Then
                 '    If txt_FkPrefix.Text = "" Then
                 '        MessageBox.Show("Le prefixe des cles etrangeres n'est pas renseigne")
@@ -408,7 +472,7 @@ Public Class FormGeneric
 #End Region
 
 #Region "Generate Script"
-    Private Sub GenerateScriptForSqlServer() 'ByVal sListAllByAnyField As String) '
+    Private Sub GenerateScript_For_SQLServer() 'ByVal sListAllByAnyField As String) '
         TreeView2.Nodes.Clear()
 #Region "Variable"
         Dim _createStore_String As String = ""
@@ -449,7 +513,8 @@ Public Class FormGeneric
                 node.Text = tr.Text
 
                 SqlServerHelper.ForeinKeyPrefix = txt_FkPrefix.Text.Trim
-                SqlServerHelper.CurrentPrefixStored = CB_ActionStoreProcedure.Text
+                'SqlServerHelper.CurrentPrefixStored = CB_ActionStoreProcedure.Text
+                SqlServerHelper.CurrentPrefixStored = ddl_PrefixStoredProcedure.Text
 
                 _createStore_String &= SqlServer.Fast.ScriptGenerator.CreateStore(tr.Text)
                 _createStore_String &= Chr(13)
@@ -472,7 +537,7 @@ Public Class FormGeneric
                 slistallforeign &= SqlServer.Fast.ScriptGenerator.ListAllByForeignKey(tr.Text)
                 slistallforeign &= Chr(13)
 
-                SqlServer.Fast.VbClassGenerator.CreateFile(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                SQLServerGenerator.ClassGenerator.VBClass.CreateFile(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
 
                 REM AdminLTE-Master
                 If RB_Template_AdminLTE_Master.Checked Then
@@ -500,17 +565,17 @@ Public Class FormGeneric
                 ElseIf RB_Template_CleanZone.Checked Then ' CLeanZone
                     'Interface ADD EDIT
                     'If RB_Formulaire_Tableau.Checked Then
-                    SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
-                        SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Tableau_Formulaire_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
-                        'ElseIf RB_Formulaire_FlowLayout.Checked Then
-                        '    SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
-                        '    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    'ElseIf RB_Formulaire_FlowLayout.Checked Then
+                    '    SqlServer.Fast.AspFormGenerator.CreateInterface_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    '    SqlServer.Fast.AspFormGenerator.CreateInterfaceCodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
-                        'End If
+                    'End If
 
-                        'Interface LISTING
-                        SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                    'Interface LISTING
+                    SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
                     SqlServer.Fast.AspFormGenerator.CreateInterface_CleanZone_Listing_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
 
                 ElseIf RB_Template_Inspinia.Checked Then
@@ -667,6 +732,218 @@ Public Class FormGeneric
             .WriteLine(slistallforeign)
             .Close()
         End With
+
+        ''With objWriterListallAnycolumn
+        ''    .WriteLine(sListAllByAnyField)
+        ''    .Close()
+        ''End With
+    End Sub
+
+    Private Sub GenerateScript_For_MySql()
+        TreeView2.Nodes.Clear()
+#Region "Variable"
+        Dim InsertStore_Str As String = ""
+        Dim UpdateStore_Str As String = ""
+        Dim DeleteStore_Str As String = ""
+        Dim ListAllStore_Str As String = ""
+        Dim SelectByIDStore_Str As String = ""
+        Dim sselectindex As String = ""
+        'Dim sselectanycolumn As String = ""
+        Dim slistallforeign As String = ""
+        'Dim slistallPagination As String = ""
+
+        'Dim ssupdateparentaddchild As String = ""
+        'Dim ssupdateparentremovechild As String = ""
+        'Dim slistallchildinparent As String = ""
+        'Dim slistallchildnotintparent As String = ""
+
+        Dim _PathForGenerate_Script As String = Cls_Enumeration.GetPath_MySQL_Script(txt_PathGenerate_ScriptFile.Text.Trim, txt_DatabaseName.Text.Trim)
+
+        Dim path_Insert As String = _PathForGenerate_Script & "01_Insert_Script.sql"
+        Dim path_Update As String = _PathForGenerate_Script & "02_Update_Script.sql"
+        Dim path_Delete As String = _PathForGenerate_Script & "03_Delete_Script.sql"
+        Dim path_ListAll As String = _PathForGenerate_Script & "04_ListAll_Script.sql"
+        Dim path_SelectByID As String = _PathForGenerate_Script & "05_Select_ByID_Script.sql"
+        'Dim path_select_ByIndex As String = _PathForGenerate_Script & "06_Select_Index_Script.sql"
+        'Dim path_listall_foreign As String = _PathForGenerate_Script & "07_ListAll_Foreign_Script.sql"
+        'Dim pathselectanycolumn As String = _PathForGenerate_Script & "ListAllAnyColumnScript.sql"
+        'Dim pathupdateparentaddchild As String = _PathForGenerate_Script & "UpdateParentAddChildScript.sql"
+        'Dim pathupdateparentremovechild As String = _PathForGenerate_Script & "UpdateParentRemoveChildScript.sql"
+        'Dim pathlistallparentinchild As String = _PathForGenerate_Script & "ListAllParentInChildScript.sql"
+        'Dim pathlistallparentnotinchild As String = _PathForGenerate_Script & "ListAllParentNotInChildScript.sql"
+
+#End Region
+        Dim ds As DataSet
+        For Each tr As TreeNode In TreeView1.Nodes
+            If tr.Checked Then
+                'Dim _table As Cls_Table
+                Dim node As New TreeNode
+                node.Text = tr.Text
+
+                MySqlHelper.ForeinKeyPrefix = txt_FkPrefix.Text.Trim
+
+                InsertStore_Str &= MySqlHelper.Insert_Store(tr.Text)
+                InsertStore_Str &= Chr(13)
+
+                UpdateStore_Str &= MySqlHelper.Update_StoreMySql(tr.Text)
+                UpdateStore_Str &= Chr(13)
+
+                DeleteStore_Str &= MySqlHelper.Delete_StoreMySql(tr.Text)
+                DeleteStore_Str &= Chr(13)
+
+                ListAllStore_Str &= MySqlHelper.ListAll_StoreMySql(tr.Text)
+                ListAllStore_Str &= Chr(13)
+
+                SelectByIDStore_Str &= MySqlHelper.SelectByID_StoreMySql(tr.Text)
+                SelectByIDStore_Str &= Chr(13)
+
+                'sselectindex &= MySqlHelper.SelectByIndexStoreMySql(tr.Text)
+                'sselectindex &= Chr(13)
+
+                'slistallforeign &= MySqlHelper.ListAllByForeignKeyMySql(tr.Text)
+                'slistallforeign &= Chr(13)
+
+                If RB_PageWebVBNET.Checked Then
+                    ' AdminLTE-Master
+                    If RB_Template_AdminLTE_Master.Checked Then
+                        'ADD
+                        'SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Tableau_Formulaire_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                        'SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Tableau_Formulaire_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+
+                        'LISTING
+                        'SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Listing_Design(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+                        'SqlServer.Fast.AspFormGenerator.CreateInterface_AdminLTE_Listing_CodeBehind(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_LibraryName, txt_DatabaseName.Text)
+                    End If
+
+                    'Template CLeanZone
+                    If RB_Template_CleanZone.Checked Then
+                        'ADD
+
+                        'LISTING
+
+                    End If
+
+                    ' Template Inspinia
+                    If RB_Template_Inspinia.Checked Then
+
+                    End If
+                    MySqlGenerator.ClassGenerator.VBClass.Create_VBClassFile(tr.Text, txt_PathGenerate_ScriptFile, ListBox_NameSpace, txt_DatabaseName.Text)
+
+                End If
+
+                If RB_PageWebPHP.Checked Then
+
+                End If
+
+                If RB_PageWebCSharpNET.Checked Then
+                End If
+
+                If RB_PageWebJSP.Checked Then
+                End If
+
+                ds = MySqlHelper.LoadTableStructure_MySql(tr.Text)
+
+                'TreeView2.Nodes.Clear()
+                For Each dt As DataRow In ds.Tables(0).Rows
+                    node.Nodes.Add(dt(0))
+                Next
+                TreeView2.Nodes.Add(node)
+            End If
+        Next
+
+
+        REM on verifie si le repertoir existe bien
+        If Not Directory.Exists(_PathForGenerate_Script) Then
+            Directory.CreateDirectory(_PathForGenerate_Script)
+        End If
+        'If txt_PathGenerate_ScriptFile.Text.Trim <> "" Then
+        '    If Not Directory.Exists(txt_PathGenerate_ScriptFile.Text.Trim & "" & RepertoiresName & "" & txt_DatabaseName.Text.Trim & SQLServer_Script) Then
+        '        Directory.CreateDirectory(txt_PathGenerate_ScriptFile.Text.Trim & "" & RepertoiresName & "" & txt_DatabaseName.Text.Trim & SQLServer_Script)
+        '    End If
+        'Else
+        '    If Not Directory.Exists(Application.StartupPath & "" & RepertoiresName & "" & txt_DatabaseName.Text.Trim & SQLServer_Script) Then
+        '        Directory.CreateDirectory(Application.StartupPath & "" & RepertoiresName & "" & txt_DatabaseName.Text.Trim & SQLServer_Script)
+        '    End If
+        'End If
+
+        Dim fs As FileStream = File.Create(path_Insert, 1024)
+        fs.Close()
+
+        Dim fs_update As FileStream = File.Create(path_Update, 1024)
+        fs_update.Close()
+
+        Dim fs_delete As FileStream = File.Create(path_Delete, 1024)
+        fs_delete.Close()
+
+        Dim fs_listAll As FileStream = File.Create(path_ListAll, 1024)
+        fs_listAll.Close()
+
+        Dim fs_select As FileStream = File.Create(path_SelectByID, 1024)
+        fs_select.Close()
+
+        'Dim fs_selectindex As FileStream = File.Create(path_select_ByIndex, 1024)
+        'fs_selectindex.Close()
+
+        'Dim fs_listAllforeign As FileStream = File.Create(path_listall_foreign, 1024)
+        'fs_listAllforeign.Close()
+
+        'Dim fs_listAllanycolumn As FileStream = File.Create(pathselectanycolumn, 1024)
+        'fs_listAllanycolumn.Close()
+
+
+        'Dim fs_updateparentaddchild As FileStream = File.Create(pathupdateparentaddchild, 1024)
+        'fs_updateparentaddchild.Close()
+
+
+        'Dim fs_updateparentremovechild As FileStream = File.Create(pathupdateparentremovechild, 1024)
+        'fs_updateparentremovechild.Close()
+
+        'Dim fs_listallparentinchild As FileStream = File.Create(pathlistallparentinchild, 1024)
+        'fs_listallparentinchild.Close()
+
+        'Dim fs_listallparentnotinchild As FileStream = File.Create(pathlistallparentnotinchild, 1024)
+        'fs_listallparentnotinchild.Close()
+
+
+
+        Dim objWriter_Insert As New System.IO.StreamWriter(path_Insert, True, System.Text.Encoding.UTF8)
+
+        Dim objWriterupdate As New System.IO.StreamWriter(path_Update, True, System.Text.Encoding.UTF8)
+        Dim objWriterdelete As New System.IO.StreamWriter(path_Delete, True, System.Text.Encoding.UTF8)
+        Dim objWriterlistAll As New System.IO.StreamWriter(path_ListAll, True, System.Text.Encoding.UTF8)
+        Dim objWriterSelect As New System.IO.StreamWriter(path_SelectByID, True, System.Text.Encoding.UTF8)
+        'Dim objWriterSelectIndex As New System.IO.StreamWriter(path_select_ByIndex, True, System.Text.Encoding.UTF8)
+        'Dim objWriterListallForeign As New System.IO.StreamWriter(path_listall_foreign, True, System.Text.Encoding.UTF8)
+        'Dim objWriterListallAnycolumn As New System.IO.StreamWriter(pathselectanycolumn, True, System.Text.Encoding.UTF8)
+
+
+        objWriter_Insert.WriteLine(InsertStore_Str)
+        objWriter_Insert.Close()
+
+        objWriterupdate.WriteLine()
+        objWriterupdate.WriteLine(UpdateStore_Str)
+        objWriterupdate.Close()
+
+        objWriterdelete.WriteLine()
+        objWriterdelete.WriteLine(DeleteStore_Str)
+        objWriterdelete.Close()
+
+        objWriterlistAll.WriteLine()
+        objWriterlistAll.WriteLine(ListAllStore_Str)
+        objWriterlistAll.Close()
+
+        objWriterSelect.WriteLine()
+        objWriterSelect.WriteLine(SelectByIDStore_Str)
+        objWriterSelect.Close()
+
+        'objWriterSelectIndex.WriteLine()
+        'objWriterSelectIndex.WriteLine(sselectindex)
+        'objWriterSelectIndex.Close()
+
+        'With objWriterListallForeign
+        '    .WriteLine(slistallforeign)
+        '    .Close()
+        'End With
 
         ''With objWriterListallAnycolumn
         ''    .WriteLine(sListAllByAnyField)

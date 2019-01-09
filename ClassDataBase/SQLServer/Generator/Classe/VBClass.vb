@@ -1,17 +1,13 @@
-﻿Imports System.Data.SqlClient
-Imports System.Data
-Imports System.Data.OleDb
+﻿Imports System.Data.OleDb
 Imports System.IO
 Imports System.Text
 Imports System.Xml
 Imports System.ComponentModel
 Imports System.Text.RegularExpressions
 
-
-Namespace SqlServer.Fast
-
-    Public Class VbClassGenerator
-
+Namespace SQLServerGenerator.ClassGenerator
+    Public Class VBClass
+#Region "VB.Net Class Fonctions"
         Public Shared Sub CreateFile(ByVal name As String, ByRef _Path_ScriptFile As TextBox, ByRef ListBox_NameSpace As ListBox, ByVal databasename As String)
             Dim Id_table As String = ""
             Dim _end As String
@@ -73,7 +69,6 @@ Namespace SqlServer.Fast
             Dim ds As DataSet = Nothing
 
             ds = SqlServerHelper.LoadTableStructure(name)
-
 
             Dim cols As New List(Of String)
             Dim types As New List(Of String)
@@ -171,8 +166,13 @@ Namespace SqlServer.Fast
                         insertstring &= ", " & cols(i)
                         updatestring &= ", " & cols(i)
                     End If
+                    Dim typeinf = types(i).ToLower
+                    If typeinf.Equals("date") Then
+                        objWriter.WriteLine("Private " & cols(i) & " As Nullable(Of DateTime)")
+                    Else
+                        objWriter.WriteLine("Private " & cols(i) & " As " & types(i))
+                    End If
 
-                    objWriter.WriteLine("Private " & cols(i) & " As " & types(i))
                     If ListofForeignKey.Contains(cols(i)) Then
                         Dim ForeinKeyPrefix As String = cols(i).Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
                         objWriter.WriteLine("Private _" & ForeinKeyPrefix & " As " & "Cls_" & ForeinKeyPrefix)
@@ -216,43 +216,110 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("End Property")
             objWriter.WriteLine()
 
-            For i As Int32 = 1 To cols.Count - 1 '- 3 ''On ne cree pas de property pour la derniere column
+            Dim countLog = 2
+            Dim IsAddCreatedBy = False
+            Dim IsAddModifBy = False
+            insertstring = ""
+            updatestring = ""
+            For i As Int32 = 1 To cols.Count - 1
                 Dim propName As String = ""
                 Dim s As String() = cols(i).Split("_")
                 For j As Integer = 1 To s.Length - 1
                     propName &= StrConv(s(j), VbStrConv.ProperCase)
                 Next
                 'propName = StrConv(cols(i).Split("_")(1), VbStrConv.ProperCase) & StrConv(cols(i).Split("_")(2), VbStrConv.ProperCase)
-                Dim log As String = "<AttributLogData(True, " & i + 1 & ")> _"
+                'Dim log As String = "<AttributLogData(True, " & i + 1 & ")> _"
+                Dim log As String = "<AttributLogData(True, " & countLog & ")> _"
                 Dim attrib As String = "Public Property  " & cols(i).Substring(1, cols(i).Length - 1) & " As " & types(i)
 
-                If cols(i) <> "_isdirty" Or cols(i) <> "_LogData" Then
-                    objWriter.WriteLine(log)
+                If cols(i).Equals("_CreatedBy") _
+                OrElse cols(i).Equals("_DateCreated") _
+                OrElse cols(i).Equals("_ModifBy") _
+                OrElse cols(i).Equals("_DateModif") Then
+
+                    attrib = "Public ReadOnly Property  " & cols(i).Substring(1, cols(i).Length - 1) & " As " & types(i)
+                    'objWriter.WriteLine(log)
                     objWriter.WriteLine(attrib)
                     objWriter.WriteLine("Get" & Chr(13) _
                                         & " Return " & cols(i) & Chr(13) _
                                         & "End Get")
-
-                    If Lcasevalue.Contains(types(i)) Then
-                        objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")" & Chr(13) _
-                                      & " If LCase(Trim(" & cols(i) & ")) <> LCase(Trim(Value)) Then" & Chr(13) _
-                                      & "_isdirty = True " & Chr(13) _
-                                      & cols(i) & " = Trim(Value)" & Chr(13) _
-                                      & "End If" & Chr(13) _
-                                      & "End Set" & Chr(13) _
-                                      & "End Property")
+                    objWriter.WriteLine("End Property")
+                    objWriter.WriteLine()
+                Else
+                    If cols(i) = "_isdirty" Then
+                    ElseIf cols(i) = "_LogData" Then
+                        attrib = "Public ReadOnly Property  Log_Data As " & types(i)
+                        objWriter.WriteLine(attrib)
+                        objWriter.WriteLine("Get" & Chr(13) _
+                                            & " Return " & cols(i) & Chr(13) _
+                                            & "End Get")
+                        objWriter.WriteLine("End Property")
+                        objWriter.WriteLine()
                     Else
-                        objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")" & Chr(13) _
-                                      & " If " & cols(i) & " <> Value Then" & Chr(13) _
-                                      & "_isdirty = True " & Chr(13) _
-                                      & cols(i) & " = Value" & Chr(13) _
-                                      & "End If" & Chr(13) _
-                                      & "End Set" & Chr(13) _
-                                      & "End Property")
+
+                        Dim typeinf = types(i).ToLower
+                        If typeinf.Equals("date") OrElse typeinf.Equals("datetime") Then
+                            attrib = "Public Property  " & cols(i).Substring(1, cols(i).Length - 1) & " As  Nullable(Of DateTime)"
+                        Else
+                            attrib = "Public Property  " & cols(i).Substring(1, cols(i).Length - 1) & " As " & types(i)
+                        End If
+
+                        objWriter.WriteLine(log)
+                        objWriter.WriteLine(attrib)
+                        objWriter.WriteLine("Get" & Chr(13) _
+                                                & " Return " & cols(i) & Chr(13) _
+                                                & "End Get")
+
+                        If Lcasevalue.Contains(types(i)) Then
+                            If typeinf.Equals("date") OrElse typeinf.Equals("datetime") Then
+                                objWriter.WriteLine("Set(ByVal Value As Nullable(Of DateTime))")
+                                objWriter.WriteLine(" If Value.HasValue AndAlso " & cols(i) & ".HasValue AndAlso Value.Value <> " & cols(i) & ".Value Then ")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Value")
+                                objWriter.WriteLine("ElseIf (Not Value.HasValue AndAlso " & cols(i) & ".HasValue) OrElse (Value.HasValue AndAlso Not " & cols(i) & ".HasValue) Then")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Value")
+                                objWriter.WriteLine("End If")
+                                objWriter.WriteLine("End Set")
+                                objWriter.WriteLine("End Property")
+                            Else
+                                objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")")
+                                objWriter.WriteLine(" If LCase(Trim(" & cols(i) & ")) <> LCase(Trim(Value)) Then")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Trim(Value)")
+                                objWriter.WriteLine("End If")
+                                objWriter.WriteLine("End Set")
+                                objWriter.WriteLine("End Property")
+                            End If
+                        Else
+                            If typeinf = "date" OrElse typeinf.Equals("datetime") Then
+                                objWriter.WriteLine("Set(ByVal Value As Nullable(Of DateTime))")
+                                objWriter.WriteLine(" If Value.HasValue AndAlso " & cols(i) & ".HasValue AndAlso Value.Value <> " & cols(i) & ".Value Then ")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Value")
+                                objWriter.WriteLine("ElseIf (Not Value.HasValue AndAlso " & cols(i) & ".HasValue) OrElse (Value.HasValue AndAlso Not " & cols(i) & ".HasValue) Then")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Value")
+                                objWriter.WriteLine("End If")
+                                objWriter.WriteLine("End Set")
+                                objWriter.WriteLine("End Property")
+                            Else
+                                objWriter.WriteLine("Set(ByVal Value As " & types(i) & ")")
+                                objWriter.WriteLine(" If " & cols(i) & " <> Value Then")
+                                objWriter.WriteLine("_isdirty = True ")
+                                objWriter.WriteLine(cols(i) & " = Value")
+                                objWriter.WriteLine("End If")
+                                objWriter.WriteLine("End Set")
+                                objWriter.WriteLine("End Property")
+                            End If
                     End If
 
                     objWriter.WriteLine()
+                        countLog += 1
+                    End If
+                End If
 
+                If cols(i) <> "_isdirty" Or cols(i) <> "_LogData" Then
                     If ListofForeignKey.Contains(cols(i)) Then
                         Dim attributUsed As String = cols(i).Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
                         'Dim ClassName As String = "Cls" & cols(i) '.Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
@@ -294,6 +361,7 @@ Namespace SqlServer.Fast
                     End If
 
                 End If
+
                 If initialtypes(i).ToString() = "image" Then
                     objWriter.WriteLine("Public Property " & cols(i).Substring(1, cols(i).Length - 1) & "String() As String")
                     objWriter.WriteLine("Get")
@@ -311,16 +379,42 @@ Namespace SqlServer.Fast
                     objWriter.WriteLine()
                 End If
 
+                Dim columnName = cols(i)
+                If columnName <> "_isdirty" AndAlso columnName <> "_LogData" Then
+                    If columnName.Equals("_CreatedBy") Then
+                        IsAddCreatedBy = True
+                    End If
+
+                    If columnName.Equals("_ModifBy") Then
+                        IsAddModifBy = True
+                    End If
+
+                    Dim typeinf = types(i).ToLower
+
+                    If columnName <> "_CreatedBy" _
+                    AndAlso columnName <> "_DateCreated" _
+                    AndAlso columnName <> "_ModifBy" _
+                    AndAlso columnName <> "_DateModif" Then
+                        If typeinf.Equals("date") OrElse typeinf.Equals("datetime") OrElse typeinf.Equals("image") OrElse typeinf.Equals("varbinary") Then
+                            insertstring &= ", IIf( " & columnName & " IsNot Nothing, " & columnName & ", DBNull.Value)"
+                            updatestring &= ", IIf( " & columnName & " IsNot Nothing, " & columnName & ", DBNull.Value)"
+                        Else
+                            insertstring &= ", " & columnName
+                            updatestring &= ", " & columnName
+                        End If
+
+                    End If
+                End If
             Next
 
-            With objWriter
-                .WriteLine("ReadOnly Property IsDataDirty() As Boolean")
-                .WriteLine("Get")
-                .WriteLine("Return _isdirty")
-                .WriteLine("End Get")
-                .WriteLine("End Property")
-                .WriteLine()
-            End With
+            'With objWriter
+            '    .WriteLine("ReadOnly Property IsDataDirty() As Boolean")
+            '    .WriteLine("Get")
+            '    .WriteLine("Return _isdirty")
+            '    .WriteLine("End Get")
+            '    .WriteLine("End Property")
+            '    .WriteLine()
+            'End With
 
             'With objWriter
             '    .WriteLine("Public ReadOnly Property LogData() As String")
@@ -337,7 +431,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("#Region "" Db Access """)
             objWriter.WriteLine("Public Function Insert(ByVal usr As String) As Integer Implements IGeneral.Insert")
             objWriter.WriteLine("_LogData = LogData(Me)")
-            objWriter.WriteLine("_id = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Insert_" & nomClasse.Substring(4, nomClasse.Length - 4) & """" & insertstring & "))', usr))")
+            objWriter.WriteLine("_id = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Insert_" & nomClasse.Substring(4, nomClasse.Length - 4) & """" & insertstring & IIf(IsAddCreatedBy, ", usr", "") & "))")
             objWriter.WriteLine("Return _id")
             objWriter.WriteLine("End Function")
 
@@ -345,7 +439,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine("Public Function Update(ByVal usr As String) As Integer Implements IGeneral.Update")
             'objWriter.WriteLine("_LogData = """"")
             objWriter.WriteLine("_LogData = GetObjectString()")
-            objWriter.WriteLine("Return SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Update_" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id" & updatestring & ")', usr)")
+            objWriter.WriteLine("Return SqlHelper.ExecuteScalar(SqlHelperParameterCache.BuildConfigDB(), ""SP_Update_" & nomClasse.Substring(4, nomClasse.Length - 4) & """, _id" & updatestring & IIf(IsAddModifBy, ", usr", "") & ")")
             objWriter.WriteLine("End Function" & Chr(13))
 
             With objWriter
@@ -355,17 +449,21 @@ Namespace SqlServer.Fast
                 For i As Int32 = 1 To cols.Count - 2
 
                     If cols(i) <> "_isdirty" Then
-                        If types(i) = "DateTime" Then
+                        If types(i) = "Date" OrElse types(i) = "DateTime" Then
                             .WriteLine(cols(i) & " = " & "TypeSafeConversion.NullSafeDate(dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """))")
+                            If cols(i) <> "_DateCreated" AndAlso cols(i) <> "_DateModif" Then
+                                .WriteLine("If " & cols(i) & ".HasValue And " & cols(i) & ".Value.Year < 1753 Then")
+                                .WriteLine("" & cols(i) & " = Nothing")
+                                .WriteLine("End If")
+                            End If
                         ElseIf initialtypes(i) = "image" OrElse initialtypes(i) = "varbinary" Then
-                            '.WriteLine(cols(i) & " = " & "dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """)")
-                            .WriteLine("If dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """) IsNot DBNull.Value Then")
-                            .WriteLine("    " & cols(i) & " = dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """)")
-                            .WriteLine("Else")
-                            .WriteLine("    " & cols(i) & " = Nothing")
-                            .WriteLine("End If")
-                        Else
-                            .WriteLine(cols(i) & " = " & "TypeSafeConversion.NullSafe" & types(i) & "(dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """))")
+                                .WriteLine("If dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """) IsNot DBNull.Value Then")
+                                .WriteLine("    " & cols(i) & " = dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """)")
+                                .WriteLine("Else")
+                                .WriteLine("    " & cols(i) & " = Nothing")
+                                .WriteLine("End If")
+                            Else
+                                .WriteLine(cols(i) & " = " & "TypeSafeConversion.NullSafe" & types(i) & "(dr(""" & cols(i).Substring(1, cols(i).Length - 1) & """))")
                         End If
                     End If
 
@@ -400,7 +498,7 @@ Namespace SqlServer.Fast
                 End If
 
                 If ListofForeignKey.Contains(cols(i)) Then
-                    Dim ForeinKeyPrefix As String = cols(i) '.Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
+                    Dim ForeinKeyPrefix As String = cols(i).Substring(SqlServerHelper.ForeinKeyPrefix.Length + 1, cols(i).Length - (SqlServerHelper.ForeinKeyPrefix.Length + 1))
                     objWriter.WriteLine("_" & ForeinKeyPrefix & " = Nothing")
                 End If
 
@@ -791,6 +889,7 @@ Namespace SqlServer.Fast
             objWriter.WriteLine()
             objWriter.Close()
         End Sub
-    End Class
 
+#End Region
+    End Class
 End Namespace

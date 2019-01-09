@@ -22,12 +22,12 @@ Public Class MySqlManager
 #Region "Loading Tables Fonctions"
 
     Public Shared Function LoadTableStructure(ByVal table As String) As DataSet
-        Dim ConString As String = _
-            "Persist Security Info=True;" & _
-            "server=" & servername & ";" & _
-            "database=" & database & ";" & _
-            "User Id=" & user_login & ";" & _
-            "password=" & password & ";"
+
+        Dim ConString As String = "Persist Security Info=True;SslMode=none;" &
+                    "server=" & servername & ";" &
+                    "User Id=" & user_login & ";" &
+                    "database=" & database & ";" &
+                    "password=" & password & ""
         Try
             Dim Con As New MySqlConnection(ConString)
             Con.Open()
@@ -84,10 +84,10 @@ Public Class MySqlManager
 
         Dim slTables As ArrayList = New ArrayList()
 
-        Dim cnString As String = "Persist Security Info=True;" & _
-                    "server=" & servername & ";" & _
-                    "User Id=" & user_login & ";" & _
-                    "database=" & database & ";" & _
+        Dim cnString As String = "Persist Security Info=True;SslMode=none;" &
+                    "server=" & servername & ";" &
+                    "User Id=" & user_login & ";" &
+                    "database=" & database & ";" &
                     "password=" & password & ""
 
         Dim strQUERY As String = "SHOW TABLES FROM " & database & ""
@@ -107,8 +107,18 @@ Public Class MySqlManager
             da = New MySqlDataAdapter(strQUERY, con)
             da.Fill(ds2)
             Schema = ds2.Tables(0)
+
+            treeview1.Nodes.Clear()
+
             For Each dr2 In Schema.Rows
-                treeview1.Nodes.Add(dr2("Tables_in_" & database))
+                ds = MySqlManager.LoadTableStructure(dr2(0))
+
+                Dim node As New TreeNode
+                node.Text = dr2("Tables_in_" & database)
+                For Each dt As DataRow In ds.Tables(1).Rows
+                    node.Nodes.Add(dt(0))
+                Next
+                treeview1.Nodes.Add(node)
             Next
             Dim _systeme As Cls_Systeme = Cls_Systeme.getInstance
             _systeme.CreateConnectionLog(servername, user_login, password, TypeDatabase.MYSQL)

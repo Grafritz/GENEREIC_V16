@@ -33,38 +33,68 @@ Namespace SqlServer.Fast
                     If count < cap Then '- 4
                         Dim champsName As String = dt(1).ToString.Trim
                         Dim longfield As Long = dt(3) / 2
-                        If (paramStore = "") Then
-                            If SpecialChar.Contains(champsName) Then
-                                If LevelOneSpecialChar.Contains(champsName) Then
-                                    paramStore = "@" & dt(0) & " " & dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")"
+
+                        If Not dt(0).ToString.Equals("ModifBy") _
+                        AndAlso Not dt(0).ToString.Equals("DateModif") Then
+
+                            If dt(0).ToString.Equals("DateCreated") Then
+                                If (paramStore = "") Then
+                                    'If SpecialChar.Contains(champsName) Then
+                                    '    If LevelOneSpecialChar.Contains(champsName) Then
+                                    '        paramStore = "@" & dt(0) & " " & dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")"
+                                    '    Else
+                                    '        paramStore = "@" & dt(0) & " " & dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"
+                                    '    End If
+                                    'Else
+                                    '    paramStore = "@" & dt(0) & " " & dt(1)
+                                    'End If
+
+                                    champStore = "[" & dt(0) & "]"
+                                    valueStore = "GETDATE()" '& dt(0)
                                 Else
-                                    paramStore = "@" & dt(0) & " " & dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"
+                                    '    paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
+                                    'IIf(SpecialChar.Contains(dt(1).ToString.Trim),
+                                    '    IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
+                                    '            , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                                    '            , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                                    '        , dt(1))
+
+                                    champStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]"
+                                    valueStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "GETDATE()" '& dt(0)
+
                                 End If
                             Else
-                                paramStore = "@" & dt(0) & " " & dt(1)
-                            End If
+                                If (paramStore = "") Then
+                                    If SpecialChar.Contains(champsName) Then
+                                        If LevelOneSpecialChar.Contains(champsName) Then
+                                            paramStore = "@" & dt(0) & " " & dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")"
+                                        Else
+                                            paramStore = "@" & dt(0) & " " & dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")"
+                                        End If
+                                    Else
+                                        paramStore = "@" & dt(0) & " " & dt(1)
+                                    End If
 
-                            'paramStore = "@" & dt(0) & " " & IIf(SpecialChar.Contains(champsName), _
-                            '                                     IIf(LevelOneSpecialChar.Contains(champsName), _
-                            '                                         dt(1) & "(" & longfield & ")" _
-                            '                                         , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
-                            '                                     , dt(1))
-                            champStore = "[" & dt(0) & "]"
-                            valueStore = "@" & dt(0)
-                        Else
-                            paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
+                                    champStore = "[" & dt(0) & "]"
+                                    valueStore = "@" & dt(0)
+                                Else
+                                    paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
                                 IIf(SpecialChar.Contains(dt(1).ToString.Trim),
                                     IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
-                                        , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
-                                        , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
-                                    , dt(1))
+                                            , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                                            , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                                        , dt(1))
 
-                            champStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]"
-                            valueStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "@" & dt(0)
+                                    champStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]"
+                                    valueStore &= Chr(13) & Chr(10) & Chr(9) & Chr(9) & "," & "@" & dt(0)
+
+                                End If
+                            End If
                         End If
+
                         count += 1
-                    Else
-                        Exit For
+                        Else
+                            Exit For
                     End If
                 End If
 
@@ -138,33 +168,68 @@ Namespace SqlServer.Fast
 
             For Each dt As DataRow In ds.Tables(1).Rows
                 If count < cap Then ' - 4
-                    If QuerySet = "" Then
-                        If dt(0) <> Id_table Then
-                            QuerySet = "[" & dt(0) & "]" & " " & "= " & "@" & dt(0)
+                    If Not dt(0).ToString.Equals("CreatedBy") _
+                        AndAlso Not dt(0).ToString.Equals("DateCreated") Then
+                        If dt(0).ToString.Equals("DateModif") Then
+                            If QuerySet = "" Then
+                                If dt(0) <> Id_table Then
+                                    QuerySet = "[" & dt(0) & "]" & " " & "= " & "GETDATE()" ' & dt(0)
+                                End If
+                            Else
+                                QuerySet &= Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]" & " " & "= " & "GETDATE()" '  & dt(0)
+                            End If
+
+                            Dim champsName As String = dt(1).ToString.Trim
+                            Dim longfield As Long = dt(3) '/ 2
+
+                            'If (paramStore = "") Then
+                            '    paramStore = "@" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
+                            '                                                 , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
+                            '                                                       , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                            '                                                       , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                            '                                                   , dt(1))
+
+                            'Else
+                            '    paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
+                            '                IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
+                            '                    , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
+                            '                          , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                            '                          , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                            '                      , dt(1))
+
+                            'End If
+                        Else
+                            If QuerySet = "" Then
+                                If dt(0) <> Id_table Then
+                                    QuerySet = "[" & dt(0) & "]" & " " & "= " & "@" & dt(0)
+                                End If
+                            Else
+                                QuerySet &= Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]" & " " & "= " & "@" & dt(0)
+                            End If
+
+                            Dim champsName As String = dt(1).ToString.Trim
+                            Dim longfield As Long = dt(3) '/ 2
+
+                            If (paramStore = "") Then
+                                paramStore = "@" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
+                                                                             , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
+                                                                                   , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                                                                                   , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                                                                               , dt(1))
+
+                            Else
+                                paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
+                                            IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
+                                                , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
+                                                      , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
+                                                      , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
+                                                  , dt(1))
+
+                            End If
                         End If
-                    Else
-                        QuerySet &= Chr(10) & Chr(9) & Chr(9) & "," & "[" & dt(0) & "]" & " " & "= " & "@" & dt(0)
                     End If
 
-                    Dim champsName As String = dt(1).ToString.Trim
-                    Dim longfield As Long = dt(3) '/ 2
 
-                    If (paramStore = "") Then
-                        paramStore = "@" & dt(0) & " " & IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
-                                                             , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
-                                                                   , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
-                                                                   , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
-                                                               , dt(1))
-
-                    Else
-                        paramStore &= Chr(13) & Chr(10) & Chr(9) & "," & "@" & dt(0) & " " &
-                            IIf(SpecialChar.Contains(dt(1).ToString.Trim) _
-                                , IIf(LevelOneSpecialChar.Contains(dt(1).ToString.Trim) _
-                                      , dt(1) & "(" & IIf(longfield <= 0, "MAX", longfield) & ")" _
-                                      , dt(1) & "(" & dt(4).ToString.Trim() & "," & dt(5).ToString.Trim() & ")") _
-                                  , dt(1))
-
-                    End If
                     count += 1
                 Else
                     Exit For

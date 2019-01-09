@@ -13,6 +13,21 @@
     <MyType>WindowsForms</MyType>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <PublishUrl>publier\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -99,12 +114,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationEvents.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\Classe\CSharpClass.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\Classe\PHPClass.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\Classe\VBClass.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\WebForm\CSharpWebForm.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\Classe\JSPClass.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\WebForm\PHPWebForm.vb" />
+    <Compile Include="ClassDataBase\MySql\Generator\WebForm\VBWebForm.vb" />
     <Compile Include="ClassDataBase\MySql\Helper\MySqlHelper.vb" />
     <Compile Include="ClassDataBase\MySql\Helper\MySqlManager.vb" />
-    <Compile Include="ClassDataBase\SqlServer\Generator\Fast\AspFormGenerator.vb" />
-    <Compile Include="ClassDataBase\SqlServer\Generator\Fast\ScriptGenerator.vb" />
-    <Compile Include="ClassDataBase\SqlServer\Generator\Fast\VbClassGenerator.vb" />
-    <Compile Include="ClassDataBase\SqlServer\Helper\SqlServerHelper.vb" />
+    <Compile Include="ClassDataBase\SQLServer\Generator\Classe\VBClass.vb" />
+    <Compile Include="ClassDataBase\SQLServer\Generator\Fast\AspFormGenerator.vb" />
+    <Compile Include="ClassDataBase\SQLServer\Generator\Fast\ScriptGenerator.vb" />
+    <Compile Include="ClassDataBase\SQLServer\Helper\SqlServerHelper.vb" />
     <Compile Include="CLassInternal\Cls_CategorieType.vb" />
     <Compile Include="CLassInternal\Cls_Column.vb" />
     <Compile Include="CLassInternal\Cls_Connection.vb" />
@@ -155,6 +177,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="bin\Debug\GENERIC_V16.exe.config" />
     <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
@@ -185,9 +208,29 @@
     <None Include="Resources\Inspinia_Template.fw.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\Generic_db.mdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\Generic_db_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>Generic_db.mdf</DependentUpon>
+    </Content>
+    <Content Include="bin\Debug\GENERIC_V16.exe" />
+    <Content Include="bin\Debug\GENERIC_V16.pdb" />
     <Content Include="GENERIC2.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 et x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

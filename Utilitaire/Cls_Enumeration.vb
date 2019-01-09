@@ -25,9 +25,10 @@ End Enum
 
 Public Class Cls_Enumeration
 
-    Public Shared APP_NAME = "GENERIC V16"
-    Public Shared PATH_GENERIC_FOLDER_DEFAULT = "\GENERIC_16\"
-    Public Shared GENERATE_BY_APP_NAME_ForStore = "/******    REM Generate By [ " & APP_NAME & " ] Application    ******/"
+    Public Const APP_NAME = "GENERIC V16"
+    Public Const APP_VERSION = "16.1"
+    Public Const PATH_GENERIC_FOLDER_DEFAULT = "\GENERIC " & APP_VERSION & "\"
+    Public Const GENERATE_BY_APP_NAME_ForStore = "/******    REM Generate By [ " & APP_NAME & " ] Application    ******/"
 
 
     Public Shared Function GetPath(ByVal _pathGenerate As String) As String
@@ -38,18 +39,19 @@ Public Class Cls_Enumeration
         Return _PathGenerate_Script
     End Function
 
+#Region "PATH MSSQL Server"
     Public Shared Function GetPath_ASP_WebForm(ByVal _pathGenerate As String, ByVal databasename As String) As String
         Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
-                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\ASP_WebForm\" _
-                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\ASP_WebForm\")
+                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_ASP_WebForm\" _
+                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_ASP_WebForm\")
 
         Return _PathGenerate_Script
     End Function
 
     Public Shared Function GetPath_VbNet_Class(ByVal _pathGenerate As String, ByVal databasename As String) As String
         Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
-                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\VbNet_Class\" _
-                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\VbNet_Class\")
+                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_VbNet_Class\" _
+                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_VbNet_Class\")
 
         Return _PathGenerate_Script
     End Function
@@ -58,9 +60,38 @@ Public Class Cls_Enumeration
         Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
                                                         , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_Script\" _
                                                         , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\SQLServer_Script\")
+        Return _PathGenerate_Script
+    End Function
+
+
+#End Region
+
+#Region "PATH MySQL"
+    Public Shared Function GetPath_MySQL_ASP_WebForm(ByVal _pathGenerate As String, ByVal databasename As String) As String
+        Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
+                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_ASP_WebForm\" _
+                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_ASP_WebForm\")
 
         Return _PathGenerate_Script
     End Function
+
+    Public Shared Function GetPath_MySQL_VbNet_Class(ByVal _pathGenerate As String, ByVal databasename As String) As String
+        Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
+                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_VbNet_Class\" _
+                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_VbNet_Class\")
+
+        Return _PathGenerate_Script
+    End Function
+
+    Public Shared Function GetPath_MySQL_Script(ByVal _pathGenerate As String, ByVal databasename As String) As String
+        Dim _PathGenerate_Script As String = IIf(_pathGenerate.Trim <> "" _
+                                                        , _pathGenerate.Trim & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_Script\" _
+                                                        , Application.StartupPath & PATH_GENERIC_FOLDER_DEFAULT & databasename & "\MySQL_Script\")
+        Return _PathGenerate_Script
+    End Function
+
+
+#End Region
 
     ''' <summary>Removes the tags from an HTML document.</summary>
     ''' <param name="htmlText">HTML text to parse.</param>

@@ -30,6 +30,9 @@ Partial Class FormGeneric
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Btn_FolderBrowserDialog_Script = New System.Windows.Forms.Button()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.Label_Version = New System.Windows.Forms.Label()
+        Me.Label22 = New System.Windows.Forms.Label()
         Me.cmb_ServerName = New System.Windows.Forms.ComboBox()
         Me.rcmb_DatabaseName = New System.Windows.Forms.ComboBox()
         Me.GrpBox_DB = New System.Windows.Forms.GroupBox()
@@ -54,14 +57,17 @@ Partial Class FormGeneric
         Me.ListBox_NameSpace = New System.Windows.Forms.ListBox()
         Me.TabBaseDeDonnees = New System.Windows.Forms.TabPage()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
-        Me.CB_ActionStoreProcedure = New System.Windows.Forms.ComboBox()
-        Me.Label21 = New System.Windows.Forms.Label()
+        Me.Label_TableNameSelected = New System.Windows.Forms.Label()
         Me.ddl_PrefixStoredProcedure = New System.Windows.Forms.ComboBox()
+        Me.Label_PageWebTechnologie = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.txt_projectName = New System.Windows.Forms.TextBox()
+        Me.Label25 = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.txt_LibraryName = New System.Windows.Forms.TextBox()
+        Me.Label_TemplateWebPage = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.Label21 = New System.Windows.Forms.Label()
         Me.txt_table = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.txt_FkPrefix = New System.Windows.Forms.TextBox()
@@ -72,6 +78,11 @@ Partial Class FormGeneric
         Me.btnOpenOutput = New System.Windows.Forms.Button()
         Me.Btn_GenererParIndex = New System.Windows.Forms.Button()
         Me.TabInterfaceWEB = New System.Windows.Forms.TabPage()
+        Me.GroupBox15 = New System.Windows.Forms.GroupBox()
+        Me.RB_PageWebJSP = New System.Windows.Forms.RadioButton()
+        Me.RB_PageWebCSharpNET = New System.Windows.Forms.RadioButton()
+        Me.RB_PageWebPHP = New System.Windows.Forms.RadioButton()
+        Me.RB_PageWebVBNET = New System.Windows.Forms.RadioButton()
         Me.GroupBox14 = New System.Windows.Forms.GroupBox()
         Me.PictureBox_Formulaire = New System.Windows.Forms.PictureBox()
         Me.GroupBox13 = New System.Windows.Forms.GroupBox()
@@ -154,6 +165,7 @@ Partial Class FormGeneric
         Me.TabBaseDeDonnees.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.TabInterfaceWEB.SuspendLayout()
+        Me.GroupBox15.SuspendLayout()
         Me.GroupBox14.SuspendLayout()
         CType(Me.PictureBox_Formulaire, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox13.SuspendLayout()
@@ -180,6 +192,9 @@ Partial Class FormGeneric
         '
         'TabControl_Form
         '
+        Me.TabControl_Form.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.TabControl_Form.Controls.Add(Me.TabParametre)
         Me.TabControl_Form.Controls.Add(Me.TabBaseDeDonnees)
         Me.TabControl_Form.Controls.Add(Me.TabInterfaceWEB)
@@ -190,7 +205,7 @@ Partial Class FormGeneric
         Me.TabControl_Form.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TabControl_Form.Name = "TabControl_Form"
         Me.TabControl_Form.SelectedIndex = 0
-        Me.TabControl_Form.Size = New System.Drawing.Size(1326, 1012)
+        Me.TabControl_Form.Size = New System.Drawing.Size(1326, 1013)
         Me.TabControl_Form.TabIndex = 16
         '
         'TabParametre
@@ -202,7 +217,7 @@ Partial Class FormGeneric
         Me.TabParametre.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TabParametre.Name = "TabParametre"
         Me.TabParametre.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.TabParametre.Size = New System.Drawing.Size(1318, 979)
+        Me.TabParametre.Size = New System.Drawing.Size(1318, 980)
         Me.TabParametre.TabIndex = 1
         Me.TabParametre.Text = "Paramètres"
         Me.TabParametre.UseVisualStyleBackColor = True
@@ -257,9 +272,11 @@ Partial Class FormGeneric
         '
         'GroupBox4
         '
-        Me.GroupBox4.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox4.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox4.BackColor = System.Drawing.Color.Transparent
+        Me.GroupBox4.Controls.Add(Me.Label23)
+        Me.GroupBox4.Controls.Add(Me.Label_Version)
+        Me.GroupBox4.Controls.Add(Me.Label22)
         Me.GroupBox4.Controls.Add(Me.cmb_ServerName)
         Me.GroupBox4.Controls.Add(Me.rcmb_DatabaseName)
         Me.GroupBox4.Controls.Add(Me.GrpBox_DB)
@@ -272,7 +289,7 @@ Partial Class FormGeneric
         Me.GroupBox4.Controls.Add(Me.Label5)
         Me.GroupBox4.Controls.Add(Me.Label4)
         Me.GroupBox4.Controls.Add(Me.lbl_Servername)
-        Me.GroupBox4.Location = New System.Drawing.Point(566, 11)
+        Me.GroupBox4.Location = New System.Drawing.Point(579, 11)
         Me.GroupBox4.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
@@ -280,6 +297,41 @@ Partial Class FormGeneric
         Me.GroupBox4.TabIndex = 1
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Paramètres Connexion Base de donnees"
+        '
+        'Label23
+        '
+        Me.Label23.AutoSize = True
+        Me.Label23.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label23.ForeColor = System.Drawing.Color.Maroon
+        Me.Label23.Location = New System.Drawing.Point(584, 103)
+        Me.Label23.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(108, 20)
+        Me.Label23.TabIndex = 19
+        Me.Label23.Text = "08 Jan 2019"
+        '
+        'Label_Version
+        '
+        Me.Label_Version.AutoSize = True
+        Me.Label_Version.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label_Version.Location = New System.Drawing.Point(571, 72)
+        Me.Label_Version.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label_Version.Name = "Label_Version"
+        Me.Label_Version.Size = New System.Drawing.Size(134, 25)
+        Me.Label_Version.TabIndex = 18
+        Me.Label_Version.Text = "Version 16.1"
+        '
+        'Label22
+        '
+        Me.Label22.AutoSize = True
+        Me.Label22.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label22.ForeColor = System.Drawing.SystemColors.HotTrack
+        Me.Label22.Location = New System.Drawing.Point(563, 36)
+        Me.Label22.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(151, 36)
+        Me.Label22.TabIndex = 17
+        Me.Label22.Text = "GENERIC"
         '
         'cmb_ServerName
         '
@@ -316,6 +368,7 @@ Partial Class FormGeneric
         'rbtn_PostGres
         '
         Me.rbtn_PostGres.AutoSize = True
+        Me.rbtn_PostGres.Enabled = False
         Me.rbtn_PostGres.Location = New System.Drawing.Point(400, 20)
         Me.rbtn_PostGres.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.rbtn_PostGres.Name = "rbtn_PostGres"
@@ -351,6 +404,7 @@ Partial Class FormGeneric
         'rbtn_Oracle
         '
         Me.rbtn_Oracle.AutoSize = True
+        Me.rbtn_Oracle.Enabled = False
         Me.rbtn_Oracle.Location = New System.Drawing.Point(9, 20)
         Me.rbtn_Oracle.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.rbtn_Oracle.Name = "rbtn_Oracle"
@@ -366,14 +420,14 @@ Partial Class FormGeneric
         Me.Btn_ConnexionServerName.Location = New System.Drawing.Point(130, 275)
         Me.Btn_ConnexionServerName.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.Btn_ConnexionServerName.Name = "Btn_ConnexionServerName"
-        Me.Btn_ConnexionServerName.Size = New System.Drawing.Size(156, 45)
+        Me.Btn_ConnexionServerName.Size = New System.Drawing.Size(385, 45)
         Me.Btn_ConnexionServerName.TabIndex = 4
         Me.Btn_ConnexionServerName.Text = "Connexion"
         Me.Btn_ConnexionServerName.UseVisualStyleBackColor = True
         '
         'txt_DatabaseName
         '
-        Me.txt_DatabaseName.Location = New System.Drawing.Point(296, 282)
+        Me.txt_DatabaseName.Location = New System.Drawing.Point(524, 172)
         Me.txt_DatabaseName.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_DatabaseName.Name = "txt_DatabaseName"
         Me.txt_DatabaseName.Size = New System.Drawing.Size(28, 26)
@@ -392,7 +446,7 @@ Partial Class FormGeneric
         '
         'txt_ServerName
         '
-        Me.txt_ServerName.Location = New System.Drawing.Point(334, 282)
+        Me.txt_ServerName.Location = New System.Drawing.Point(523, 228)
         Me.txt_ServerName.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_ServerName.Name = "txt_ServerName"
         Me.txt_ServerName.Size = New System.Drawing.Size(28, 26)
@@ -450,8 +504,6 @@ Partial Class FormGeneric
         '
         'GroupBox3
         '
-        Me.GroupBox3.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox3.BackColor = System.Drawing.Color.WhiteSmoke
         Me.GroupBox3.Controls.Add(Me.Btn_Remove)
         Me.GroupBox3.Controls.Add(Me.Btn_AddNameSpace)
@@ -462,7 +514,7 @@ Partial Class FormGeneric
         Me.GroupBox3.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.GroupBox3.Size = New System.Drawing.Size(734, 340)
+        Me.GroupBox3.Size = New System.Drawing.Size(561, 340)
         Me.GroupBox3.TabIndex = 0
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Import NameSpace"
@@ -531,21 +583,24 @@ Partial Class FormGeneric
         Me.TabBaseDeDonnees.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TabBaseDeDonnees.Name = "TabBaseDeDonnees"
         Me.TabBaseDeDonnees.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.TabBaseDeDonnees.Size = New System.Drawing.Size(1318, 979)
+        Me.TabBaseDeDonnees.Size = New System.Drawing.Size(1318, 980)
         Me.TabBaseDeDonnees.TabIndex = 0
         Me.TabBaseDeDonnees.Text = "Base de Données"
         Me.TabBaseDeDonnees.UseVisualStyleBackColor = True
         '
         'GroupBox2
         '
-        Me.GroupBox2.Controls.Add(Me.CB_ActionStoreProcedure)
-        Me.GroupBox2.Controls.Add(Me.Label21)
+        Me.GroupBox2.Controls.Add(Me.Label_TableNameSelected)
         Me.GroupBox2.Controls.Add(Me.ddl_PrefixStoredProcedure)
+        Me.GroupBox2.Controls.Add(Me.Label_PageWebTechnologie)
         Me.GroupBox2.Controls.Add(Me.Label10)
         Me.GroupBox2.Controls.Add(Me.txt_projectName)
+        Me.GroupBox2.Controls.Add(Me.Label25)
         Me.GroupBox2.Controls.Add(Me.Label1)
         Me.GroupBox2.Controls.Add(Me.txt_LibraryName)
+        Me.GroupBox2.Controls.Add(Me.Label_TemplateWebPage)
         Me.GroupBox2.Controls.Add(Me.Label7)
+        Me.GroupBox2.Controls.Add(Me.Label21)
         Me.GroupBox2.Controls.Add(Me.txt_table)
         Me.GroupBox2.Controls.Add(Me.Label2)
         Me.GroupBox2.Controls.Add(Me.txt_FkPrefix)
@@ -556,45 +611,48 @@ Partial Class FormGeneric
         Me.GroupBox2.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.GroupBox2.Size = New System.Drawing.Size(1301, 582)
+        Me.GroupBox2.Size = New System.Drawing.Size(1301, 615)
         Me.GroupBox2.TabIndex = 11
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Liste des tables de la base de données"
         '
-        'CB_ActionStoreProcedure
+        'Label_TableNameSelected
         '
-        Me.CB_ActionStoreProcedure.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.CB_ActionStoreProcedure.FormattingEnabled = True
-        Me.CB_ActionStoreProcedure.Items.AddRange(New Object() {"CREATE ", "ALTER "})
-        Me.CB_ActionStoreProcedure.Location = New System.Drawing.Point(152, 32)
-        Me.CB_ActionStoreProcedure.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.CB_ActionStoreProcedure.Name = "CB_ActionStoreProcedure"
-        Me.CB_ActionStoreProcedure.Size = New System.Drawing.Size(368, 28)
-        Me.CB_ActionStoreProcedure.TabIndex = 21
-        '
-        'Label21
-        '
-        Me.Label21.AutoSize = True
-        Me.Label21.Location = New System.Drawing.Point(9, 39)
-        Me.Label21.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label21.Name = "Label21"
-        Me.Label21.Size = New System.Drawing.Size(133, 20)
-        Me.Label21.TabIndex = 20
-        Me.Label21.Text = "Store Procedure :"
+        Me.Label_TableNameSelected.AutoSize = True
+        Me.Label_TableNameSelected.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label_TableNameSelected.ForeColor = System.Drawing.SystemColors.HotTrack
+        Me.Label_TableNameSelected.Location = New System.Drawing.Point(8, 55)
+        Me.Label_TableNameSelected.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label_TableNameSelected.Name = "Label_TableNameSelected"
+        Me.Label_TableNameSelected.Size = New System.Drawing.Size(136, 36)
+        Me.Label_TableNameSelected.TabIndex = 20
+        Me.Label_TableNameSelected.Text = "Tables:..."
         '
         'ddl_PrefixStoredProcedure
         '
         Me.ddl_PrefixStoredProcedure.FormattingEnabled = True
-        Me.ddl_PrefixStoredProcedure.Location = New System.Drawing.Point(816, 29)
+        Me.ddl_PrefixStoredProcedure.Items.AddRange(New Object() {"CREATE", "ALTER"})
+        Me.ddl_PrefixStoredProcedure.Location = New System.Drawing.Point(1108, 121)
         Me.ddl_PrefixStoredProcedure.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.ddl_PrefixStoredProcedure.Name = "ddl_PrefixStoredProcedure"
-        Me.ddl_PrefixStoredProcedure.Size = New System.Drawing.Size(252, 28)
+        Me.ddl_PrefixStoredProcedure.Size = New System.Drawing.Size(185, 28)
         Me.ddl_PrefixStoredProcedure.TabIndex = 19
+        '
+        'Label_PageWebTechnologie
+        '
+        Me.Label_PageWebTechnologie.AutoSize = True
+        Me.Label_PageWebTechnologie.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label_PageWebTechnologie.Location = New System.Drawing.Point(683, 570)
+        Me.Label_PageWebTechnologie.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label_PageWebTechnologie.Name = "Label_PageWebTechnologie"
+        Me.Label_PageWebTechnologie.Size = New System.Drawing.Size(140, 25)
+        Me.Label_PageWebTechnologie.TabIndex = 24
+        Me.Label_PageWebTechnologie.Text = "ASP VB.NET"
         '
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(745, 35)
+        Me.Label10.Location = New System.Drawing.Point(1108, 96)
         Me.Label10.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(56, 20)
@@ -603,16 +661,30 @@ Partial Class FormGeneric
         '
         'txt_projectName
         '
-        Me.txt_projectName.Location = New System.Drawing.Point(687, 529)
+        Me.txt_projectName.Enabled = False
+        Me.txt_projectName.Location = New System.Drawing.Point(1108, 188)
         Me.txt_projectName.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_projectName.Name = "txt_projectName"
-        Me.txt_projectName.Size = New System.Drawing.Size(314, 26)
+        Me.txt_projectName.ReadOnly = True
+        Me.txt_projectName.Size = New System.Drawing.Size(185, 26)
         Me.txt_projectName.TabIndex = 16
+        '
+        'Label25
+        '
+        Me.Label25.AutoSize = True
+        Me.Label25.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label25.ForeColor = System.Drawing.SystemColors.HotTrack
+        Me.Label25.Location = New System.Drawing.Point(540, 566)
+        Me.Label25.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label25.Name = "Label25"
+        Me.Label25.Size = New System.Drawing.Size(148, 29)
+        Me.Label25.TabIndex = 23
+        Me.Label25.Text = "Page Web :"
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(531, 538)
+        Me.Label1.Location = New System.Drawing.Point(1108, 163)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(103, 20)
@@ -621,34 +693,59 @@ Partial Class FormGeneric
         '
         'txt_LibraryName
         '
-        Me.txt_LibraryName.Location = New System.Drawing.Point(687, 492)
+        Me.txt_LibraryName.Location = New System.Drawing.Point(165, 567)
         Me.txt_LibraryName.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_LibraryName.Name = "txt_LibraryName"
         Me.txt_LibraryName.Size = New System.Drawing.Size(314, 26)
         Me.txt_LibraryName.TabIndex = 14
         '
+        'Label_TemplateWebPage
+        '
+        Me.Label_TemplateWebPage.AutoSize = True
+        Me.Label_TemplateWebPage.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label_TemplateWebPage.Location = New System.Drawing.Point(683, 533)
+        Me.Label_TemplateWebPage.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label_TemplateWebPage.Name = "Label_TemplateWebPage"
+        Me.Label_TemplateWebPage.Size = New System.Drawing.Size(118, 25)
+        Me.Label_TemplateWebPage.TabIndex = 22
+        Me.Label_TemplateWebPage.Text = "CleanZone"
+        '
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(526, 498)
+        Me.Label7.Location = New System.Drawing.Point(4, 573)
         Me.Label7.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(110, 20)
         Me.Label7.TabIndex = 13
         Me.Label7.Text = "Library Name :"
         '
+        'Label21
+        '
+        Me.Label21.AutoSize = True
+        Me.Label21.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label21.ForeColor = System.Drawing.SystemColors.HotTrack
+        Me.Label21.Location = New System.Drawing.Point(550, 526)
+        Me.Label21.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(138, 29)
+        Me.Label21.TabIndex = 21
+        Me.Label21.Text = "Template :"
+        '
         'txt_table
         '
-        Me.txt_table.Location = New System.Drawing.Point(165, 532)
+        Me.txt_table.Enabled = False
+        Me.txt_table.Location = New System.Drawing.Point(1108, 244)
         Me.txt_table.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_table.Name = "txt_table"
-        Me.txt_table.Size = New System.Drawing.Size(314, 26)
+        Me.txt_table.ReadOnly = True
+        Me.txt_table.Size = New System.Drawing.Size(185, 26)
         Me.txt_table.TabIndex = 12
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(9, 538)
+        Me.Label2.Location = New System.Drawing.Point(1108, 219)
         Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(99, 20)
@@ -657,7 +754,7 @@ Partial Class FormGeneric
         '
         'txt_FkPrefix
         '
-        Me.txt_FkPrefix.Location = New System.Drawing.Point(165, 492)
+        Me.txt_FkPrefix.Location = New System.Drawing.Point(165, 530)
         Me.txt_FkPrefix.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.txt_FkPrefix.Name = "txt_FkPrefix"
         Me.txt_FkPrefix.Size = New System.Drawing.Size(314, 26)
@@ -667,7 +764,7 @@ Partial Class FormGeneric
         'lbl_FkPrefix
         '
         Me.lbl_FkPrefix.AutoSize = True
-        Me.lbl_FkPrefix.Location = New System.Drawing.Point(9, 499)
+        Me.lbl_FkPrefix.Location = New System.Drawing.Point(9, 537)
         Me.lbl_FkPrefix.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lbl_FkPrefix.Name = "lbl_FkPrefix"
         Me.lbl_FkPrefix.Size = New System.Drawing.Size(144, 20)
@@ -678,7 +775,7 @@ Partial Class FormGeneric
         '
         Me.TreeView1.CheckBoxes = True
         Me.TreeView1.FullRowSelect = True
-        Me.TreeView1.Location = New System.Drawing.Point(9, 71)
+        Me.TreeView1.Location = New System.Drawing.Point(9, 96)
         Me.TreeView1.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TreeView1.Name = "TreeView1"
         Me.TreeView1.Size = New System.Drawing.Size(511, 410)
@@ -687,7 +784,7 @@ Partial Class FormGeneric
         'TreeView2
         '
         Me.TreeView2.CheckBoxes = True
-        Me.TreeView2.Location = New System.Drawing.Point(545, 71)
+        Me.TreeView2.Location = New System.Drawing.Point(545, 96)
         Me.TreeView2.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TreeView2.Name = "TreeView2"
         Me.TreeView2.Size = New System.Drawing.Size(555, 410)
@@ -697,7 +794,7 @@ Partial Class FormGeneric
         '
         Me.Btn_GenererScript.Cursor = System.Windows.Forms.Cursors.Hand
         Me.Btn_GenererScript.Enabled = False
-        Me.Btn_GenererScript.Location = New System.Drawing.Point(9, 601)
+        Me.Btn_GenererScript.Location = New System.Drawing.Point(9, 634)
         Me.Btn_GenererScript.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.Btn_GenererScript.Name = "Btn_GenererScript"
         Me.Btn_GenererScript.Size = New System.Drawing.Size(279, 54)
@@ -708,7 +805,7 @@ Partial Class FormGeneric
         'btnOpenOutput
         '
         Me.btnOpenOutput.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.btnOpenOutput.Location = New System.Drawing.Point(352, 601)
+        Me.btnOpenOutput.Location = New System.Drawing.Point(352, 634)
         Me.btnOpenOutput.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.btnOpenOutput.Name = "btnOpenOutput"
         Me.btnOpenOutput.Size = New System.Drawing.Size(177, 54)
@@ -719,7 +816,7 @@ Partial Class FormGeneric
         'Btn_GenererParIndex
         '
         Me.Btn_GenererParIndex.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.Btn_GenererParIndex.Location = New System.Drawing.Point(818, 601)
+        Me.Btn_GenererParIndex.Location = New System.Drawing.Point(818, 634)
         Me.Btn_GenererParIndex.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.Btn_GenererParIndex.Name = "Btn_GenererParIndex"
         Me.Btn_GenererParIndex.Size = New System.Drawing.Size(291, 54)
@@ -729,6 +826,7 @@ Partial Class FormGeneric
         '
         'TabInterfaceWEB
         '
+        Me.TabInterfaceWEB.Controls.Add(Me.GroupBox15)
         Me.TabInterfaceWEB.Controls.Add(Me.GroupBox14)
         Me.TabInterfaceWEB.Controls.Add(Me.GroupBox13)
         Me.TabInterfaceWEB.Controls.Add(Me.GroupBox11)
@@ -736,20 +834,85 @@ Partial Class FormGeneric
         Me.TabInterfaceWEB.Location = New System.Drawing.Point(4, 29)
         Me.TabInterfaceWEB.Margin = New System.Windows.Forms.Padding(3, 4, 3, 4)
         Me.TabInterfaceWEB.Name = "TabInterfaceWEB"
-        Me.TabInterfaceWEB.Size = New System.Drawing.Size(1318, 979)
+        Me.TabInterfaceWEB.Size = New System.Drawing.Size(1318, 980)
         Me.TabInterfaceWEB.TabIndex = 5
         Me.TabInterfaceWEB.Text = "Interface WEB"
         Me.TabInterfaceWEB.UseVisualStyleBackColor = True
+        '
+        'GroupBox15
+        '
+        Me.GroupBox15.BackColor = System.Drawing.Color.Transparent
+        Me.GroupBox15.Controls.Add(Me.RB_PageWebJSP)
+        Me.GroupBox15.Controls.Add(Me.RB_PageWebCSharpNET)
+        Me.GroupBox15.Controls.Add(Me.RB_PageWebPHP)
+        Me.GroupBox15.Controls.Add(Me.RB_PageWebVBNET)
+        Me.GroupBox15.Location = New System.Drawing.Point(294, 46)
+        Me.GroupBox15.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.GroupBox15.Name = "GroupBox15"
+        Me.GroupBox15.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.GroupBox15.Size = New System.Drawing.Size(248, 216)
+        Me.GroupBox15.TabIndex = 5
+        Me.GroupBox15.TabStop = False
+        Me.GroupBox15.Text = "Interface WEB - Technologie"
+        '
+        'RB_PageWebJSP
+        '
+        Me.RB_PageWebJSP.AutoSize = True
+        Me.RB_PageWebJSP.Enabled = False
+        Me.RB_PageWebJSP.Location = New System.Drawing.Point(8, 151)
+        Me.RB_PageWebJSP.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.RB_PageWebJSP.Name = "RB_PageWebJSP"
+        Me.RB_PageWebJSP.Size = New System.Drawing.Size(201, 24)
+        Me.RB_PageWebJSP.TabIndex = 5
+        Me.RB_PageWebJSP.Text = "JSP (Java Server Page)"
+        Me.RB_PageWebJSP.UseVisualStyleBackColor = True
+        '
+        'RB_PageWebCSharpNET
+        '
+        Me.RB_PageWebCSharpNET.AutoSize = True
+        Me.RB_PageWebCSharpNET.Enabled = False
+        Me.RB_PageWebCSharpNET.Location = New System.Drawing.Point(9, 115)
+        Me.RB_PageWebCSharpNET.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.RB_PageWebCSharpNET.Name = "RB_PageWebCSharpNET"
+        Me.RB_PageWebCSharpNET.Size = New System.Drawing.Size(125, 24)
+        Me.RB_PageWebCSharpNET.TabIndex = 4
+        Me.RB_PageWebCSharpNET.Text = "ASP C#.NET"
+        Me.RB_PageWebCSharpNET.UseVisualStyleBackColor = True
+        '
+        'RB_PageWebPHP
+        '
+        Me.RB_PageWebPHP.AutoSize = True
+        Me.RB_PageWebPHP.Enabled = False
+        Me.RB_PageWebPHP.Location = New System.Drawing.Point(9, 79)
+        Me.RB_PageWebPHP.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.RB_PageWebPHP.Name = "RB_PageWebPHP"
+        Me.RB_PageWebPHP.Size = New System.Drawing.Size(230, 24)
+        Me.RB_PageWebPHP.TabIndex = 3
+        Me.RB_PageWebPHP.Text = "PHP (Personal Home Page)"
+        Me.RB_PageWebPHP.UseVisualStyleBackColor = True
+        '
+        'RB_PageWebVBNET
+        '
+        Me.RB_PageWebVBNET.AutoSize = True
+        Me.RB_PageWebVBNET.Checked = True
+        Me.RB_PageWebVBNET.Location = New System.Drawing.Point(9, 42)
+        Me.RB_PageWebVBNET.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.RB_PageWebVBNET.Name = "RB_PageWebVBNET"
+        Me.RB_PageWebVBNET.Size = New System.Drawing.Size(127, 24)
+        Me.RB_PageWebVBNET.TabIndex = 2
+        Me.RB_PageWebVBNET.TabStop = True
+        Me.RB_PageWebVBNET.Text = "ASP VB.NET"
+        Me.RB_PageWebVBNET.UseVisualStyleBackColor = True
         '
         'GroupBox14
         '
         Me.GroupBox14.BackColor = System.Drawing.Color.Transparent
         Me.GroupBox14.Controls.Add(Me.PictureBox_Formulaire)
-        Me.GroupBox14.Location = New System.Drawing.Point(11, 361)
+        Me.GroupBox14.Location = New System.Drawing.Point(590, 444)
         Me.GroupBox14.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox14.Name = "GroupBox14"
         Me.GroupBox14.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.GroupBox14.Size = New System.Drawing.Size(570, 372)
+        Me.GroupBox14.Size = New System.Drawing.Size(696, 426)
         Me.GroupBox14.TabIndex = 15
         Me.GroupBox14.TabStop = False
         Me.GroupBox14.Text = "Appercu Formulaire"
@@ -760,7 +923,7 @@ Partial Class FormGeneric
         Me.PictureBox_Formulaire.Location = New System.Drawing.Point(10, 28)
         Me.PictureBox_Formulaire.Margin = New System.Windows.Forms.Padding(3, 4, 3, 4)
         Me.PictureBox_Formulaire.Name = "PictureBox_Formulaire"
-        Me.PictureBox_Formulaire.Size = New System.Drawing.Size(548, 335)
+        Me.PictureBox_Formulaire.Size = New System.Drawing.Size(673, 389)
         Me.PictureBox_Formulaire.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox_Formulaire.TabIndex = 0
         Me.PictureBox_Formulaire.TabStop = False
@@ -773,7 +936,7 @@ Partial Class FormGeneric
         Me.GroupBox13.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox13.Name = "GroupBox13"
         Me.GroupBox13.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.GroupBox13.Size = New System.Drawing.Size(570, 372)
+        Me.GroupBox13.Size = New System.Drawing.Size(696, 403)
         Me.GroupBox13.TabIndex = 14
         Me.GroupBox13.TabStop = False
         Me.GroupBox13.Text = "Appercu Template"
@@ -784,7 +947,7 @@ Partial Class FormGeneric
         Me.PictureBox_Template.Location = New System.Drawing.Point(10, 28)
         Me.PictureBox_Template.Margin = New System.Windows.Forms.Padding(3, 4, 3, 4)
         Me.PictureBox_Template.Name = "PictureBox_Template"
-        Me.PictureBox_Template.Size = New System.Drawing.Size(548, 335)
+        Me.PictureBox_Template.Size = New System.Drawing.Size(673, 358)
         Me.PictureBox_Template.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox_Template.TabIndex = 0
         Me.PictureBox_Template.TabStop = False
@@ -795,7 +958,7 @@ Partial Class FormGeneric
         Me.GroupBox11.Controls.Add(Me.RB_Template_Inspinia)
         Me.GroupBox11.Controls.Add(Me.RB_Template_CleanZone)
         Me.GroupBox11.Controls.Add(Me.RB_Template_AdminLTE_Master)
-        Me.GroupBox11.Location = New System.Drawing.Point(174, 104)
+        Me.GroupBox11.Location = New System.Drawing.Point(21, 46)
         Me.GroupBox11.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox11.Name = "GroupBox11"
         Me.GroupBox11.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
@@ -807,6 +970,7 @@ Partial Class FormGeneric
         'RB_Template_Inspinia
         '
         Me.RB_Template_Inspinia.AutoSize = True
+        Me.RB_Template_Inspinia.Enabled = False
         Me.RB_Template_Inspinia.Location = New System.Drawing.Point(9, 115)
         Me.RB_Template_Inspinia.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.RB_Template_Inspinia.Name = "RB_Template_Inspinia"
@@ -843,7 +1007,7 @@ Partial Class FormGeneric
         '
         Me.GroupBox12.Controls.Add(Me.RB_Formulaire_FlowLayout)
         Me.GroupBox12.Controls.Add(Me.RB_Formulaire_Tableau)
-        Me.GroupBox12.Location = New System.Drawing.Point(744, 532)
+        Me.GroupBox12.Location = New System.Drawing.Point(322, 613)
         Me.GroupBox12.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.GroupBox12.Name = "GroupBox12"
         Me.GroupBox12.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
@@ -855,6 +1019,7 @@ Partial Class FormGeneric
         'RB_Formulaire_FlowLayout
         '
         Me.RB_Formulaire_FlowLayout.AutoSize = True
+        Me.RB_Formulaire_FlowLayout.Enabled = False
         Me.RB_Formulaire_FlowLayout.Location = New System.Drawing.Point(123, 29)
         Me.RB_Formulaire_FlowLayout.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.RB_Formulaire_FlowLayout.Name = "RB_Formulaire_FlowLayout"
@@ -883,7 +1048,7 @@ Partial Class FormGeneric
         Me.TabGroupe.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.TabGroupe.Name = "TabGroupe"
         Me.TabGroupe.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.TabGroupe.Size = New System.Drawing.Size(1318, 979)
+        Me.TabGroupe.Size = New System.Drawing.Size(1318, 980)
         Me.TabGroupe.TabIndex = 2
         Me.TabGroupe.Text = "Groupe"
         Me.TabGroupe.UseVisualStyleBackColor = True
@@ -979,7 +1144,7 @@ Partial Class FormGeneric
         Me.tab_EcranProgression.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.tab_EcranProgression.Name = "tab_EcranProgression"
         Me.tab_EcranProgression.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.tab_EcranProgression.Size = New System.Drawing.Size(1318, 979)
+        Me.tab_EcranProgression.Size = New System.Drawing.Size(1318, 980)
         Me.tab_EcranProgression.TabIndex = 3
         Me.tab_EcranProgression.Text = "Progression"
         Me.tab_EcranProgression.UseVisualStyleBackColor = True
@@ -1179,7 +1344,7 @@ Partial Class FormGeneric
         Me.tabReportGeneration.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.tabReportGeneration.Name = "tabReportGeneration"
         Me.tabReportGeneration.Padding = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.tabReportGeneration.Size = New System.Drawing.Size(1318, 979)
+        Me.tabReportGeneration.Size = New System.Drawing.Size(1318, 980)
         Me.tabReportGeneration.TabIndex = 4
         Me.tabReportGeneration.Text = "ReportGeneration"
         Me.tabReportGeneration.UseVisualStyleBackColor = True
@@ -1503,13 +1668,14 @@ Partial Class FormGeneric
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(9.0!, 20.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1326, 1046)
+        Me.ClientSize = New System.Drawing.Size(1326, 1050)
         Me.Controls.Add(Me.TabControl_Form)
         Me.Controls.Add(Me.MenuStrip1)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "FormGeneric"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "GENERIC V16"
+        Me.Text = "GENERIC V16.1"
+        Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.TabControl_Form.ResumeLayout(False)
         Me.TabParametre.ResumeLayout(False)
         Me.GroupBox5.ResumeLayout(False)
@@ -1524,6 +1690,8 @@ Partial Class FormGeneric
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
         Me.TabInterfaceWEB.ResumeLayout(False)
+        Me.GroupBox15.ResumeLayout(False)
+        Me.GroupBox15.PerformLayout()
         Me.GroupBox14.ResumeLayout(False)
         CType(Me.PictureBox_Formulaire, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox13.ResumeLayout(False)
@@ -1588,8 +1756,6 @@ Partial Class FormGeneric
     Friend WithEvents ListBox_NameSpace As ListBox
     Friend WithEvents TabBaseDeDonnees As TabPage
     Friend WithEvents GroupBox2 As GroupBox
-    Friend WithEvents CB_ActionStoreProcedure As ComboBox
-    Friend WithEvents Label21 As Label
     Friend WithEvents ddl_PrefixStoredProcedure As ComboBox
     Friend WithEvents Label10 As Label
     Friend WithEvents btnOpenOutput As Button
@@ -1679,4 +1845,17 @@ Partial Class FormGeneric
     Friend WithEvents AideToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents AProposToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents FolderBrowserDialog1 As FolderBrowserDialog
+    Friend WithEvents Label_Version As Label
+    Friend WithEvents Label22 As Label
+    Friend WithEvents GroupBox15 As GroupBox
+    Friend WithEvents RB_PageWebCSharpNET As RadioButton
+    Friend WithEvents RB_PageWebPHP As RadioButton
+    Friend WithEvents RB_PageWebVBNET As RadioButton
+    Friend WithEvents Label_PageWebTechnologie As Label
+    Friend WithEvents Label25 As Label
+    Friend WithEvents Label_TemplateWebPage As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents Label_TableNameSelected As Label
+    Friend WithEvents RB_PageWebJSP As RadioButton
+    Friend WithEvents Label23 As Label
 End Class
